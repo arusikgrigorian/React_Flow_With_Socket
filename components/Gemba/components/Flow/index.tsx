@@ -1,52 +1,86 @@
+import { useCallback, useContext } from "react";
+
 import ReactFlow, {
   Background,
   BackgroundVariant,
   Controls,
   Node,
+  NodeOrigin,
   Panel,
+  ProOptions,
   useNodesState,
+  useReactFlow,
 } from "reactflow";
 
-import "reactflow/dist/style.css";
-import { Button, Space } from "antd";
-import { useState } from "react";
+import CustomNode from "../CustomNode";
+import FlowPanel from "../FlowPanel";
+import { FullScreenContext } from "@/context/GembaScreenContext";
+import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
 
-const initialNodes: Node[] = [
-  {
-    id: "1",
-    position: { x: 50, y: 100 },
-    data: { label: "Node 1" },
-  },
-  {
-    id: "2",
-    position: { x: 500, y: 300 },
-    data: { label: "Node 2" },
-  },
-];
+import "reactflow/dist/style.css";
+
+const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
+const nodeOrigin: NodeOrigin = [0.5, 0.5];
+const nodeTypes = { custom: CustomNode };
 
 export default function Flow() {
-  const [isViewExpanded, setIsViewExpanded] = useState<boolean>(true);
+  const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>(initialNodes);
+  const { fitView, project } = useReactFlow();
+  const [nodes, setNodes, onNodesChange] = useNodesState<Array<Node>>([]);
+
+  const onFitView = () => fitView({ duration: 400 });
+
+  const onCustomNodeAdd = useCallback(() => {
+    const id = getGembaCustomNodeId();
+    const position = project({ x: 0, y: 0 });
+
+    const newCustomNode: Node = {
+      id,
+      position,
+      type: "custom",
+      deletable: true,
+      draggable: true,
+      selectable: true,
+      data: { id, title: "zzzzzzz", description: "bbzzbzbzbzb" },
+    };
+
+    setNodes((nds) => nds.concat(newCustomNode));
+    setTimeout(onFitView, 100);
+  }, [project]);
+
+  const onScreenSizeChange = () => {
+    setIsFullScreen(!isFullScreen);
+    setTimeout(onFitView, 400);
+  };
 
   return (
     <main className={"max-h-screen"}>
-      <div className={"w-screen h-screen"}>
-        <ReactFlow nodes={nodes} onNodesChange={onNodesChange}>
-          <Background
-            variant={BackgroundVariant.Dots}
-            color={"#bfc8d1"}
-            gap={12}
-            size={1}
-          />
+      <div
+        className={`${
+          isFullScreen ? "w-screen" : "w-96"
+        } h-screen transition-[width] 400ms ease-in-out bg-blue-2`}
+      >
+        <ReactFlow
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          fitView={true}
+          zoomOnScroll={true}
+          zoomOnPinch={true}
+          nodeOrigin={nodeOrigin}
+          minZoom={-Infinity}
+          maxZoom={Infinity}
+          proOptions={proOptions}
+        >
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
           <Panel position={"top-left"}>
-            <Space size={8}>
-              <Button type={"primary"} className={"bg-amber-500"}>
-                Add New
-              </Button>
-              <Button>Fit View</Button>
-              <Button>{isViewExpanded ? "Expand" : "Shrink"}</Button>
-            </Space>
+            <FlowPanel
+              isFullScreen={isFullScreen}
+              onCustomNodeAdd={onCustomNodeAdd}
+              onFitView={onFitView}
+              onScreenSizeChange={onScreenSizeChange}
+            />
           </Panel>
           <Controls
             position={"bottom-right"}

@@ -2,3 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --color-blue-2: #e9f4ff;
+    --color-blue-5: #1d7fe0;
+    --color-blue-6: #0066cc;
+
+    --color-gray-5: #83848a;
+    --color-gray-6: #4a4a4e;
+}
+
+@layer components {
+    .btn-default {
+        @apply text-gray-6 hover:border-blue-5 hover:text-blue-5 !important
+    }
+
+    .btn-primary {
+        @apply bg-blue-6 hover:bg-blue-5 !important
+    }
+}
+
