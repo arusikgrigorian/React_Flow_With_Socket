@@ -16,6 +16,7 @@ import CustomNode from "../CustomNode";
 import FlowPanel from "../FlowPanel";
 import { FullScreenContext } from "@/context/GembaScreenContext";
 import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
+import { hexToRgb } from "@/utils/hexToRgb";
 
 import "reactflow/dist/style.css";
 
@@ -42,7 +43,12 @@ export default function Flow() {
       deletable: true,
       draggable: true,
       selectable: true,
-      data: { id, title: "zzzzzzz", description: "bbzzbzbzbzb" },
+      data: {
+        id,
+        title: "Ticket Title",
+        description: "Ticket Description",
+        color: hexToRgb(),
+      },
     };
 
     setNodes((nds) => nds.concat(newCustomNode));

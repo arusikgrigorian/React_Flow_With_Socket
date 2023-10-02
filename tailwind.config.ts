@@ -25,6 +25,9 @@ const config: Config = {
         6: "var(--color-gray-6)",
       },
     },
+    borderRadius: {
+      default: "8px",
+    },
   },
   plugins: [],
   important: true,
