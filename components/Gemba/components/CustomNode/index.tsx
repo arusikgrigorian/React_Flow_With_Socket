@@ -4,6 +4,7 @@ import { Button, ColorPicker, Form, Input, Tooltip } from "antd";
 import { BgColorsOutlined, DeleteOutlined } from "@ant-design/icons";
 import { isColorLight } from "@/utils/defineColorMode";
 import { useForm } from "antd/es/form/Form";
+import { convertRgbToHex } from "@/utils/convertRgbToHex";
 
 type Data = {
   id: string;
@@ -19,11 +20,11 @@ type Props = {
 const CustomNode = memo(function CustomNode({ data }: Props) {
   const { id, title = "", description = "", color } = data;
 
-  const [form] = useForm();
-
   const inputColor = isColorLight(color)
     ? "text-gray-5 placeholder-gray-5"
     : "text-[white] placeholder-[white]";
+
+  const [form] = useForm();
 
   const onFormItemChange = (itemName: "color" | "title" | "description") => {
     const isItemNameColor = itemName === "color";
@@ -53,13 +54,14 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
         </Button>
       </NodeToolbar>
       <div
+        // TODO - create util function to check if the color has opacity
         style={{ backgroundColor: `rgb(${color}, 0.8)` }}
         className={`min-h-[200px] p-2 outline-none rounded-default`}
       >
         <Form
           className={"[&_.ant-form-item]:my-0"}
           form={form}
-          initialValues={{ title, description }}
+          initialValues={{ title, description, color: convertRgbToHex(color) }}
         >
           <Form.Item className={"absolute right-2 "} name={"color"}>
             <ColorPicker onChange={() => onFormItemChange("color")}>
