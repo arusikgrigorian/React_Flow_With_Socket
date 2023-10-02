@@ -16,7 +16,7 @@ import CustomNode from "../CustomNode";
 import FlowPanel from "../FlowPanel";
 import { FullScreenContext } from "@/context/GembaScreenContext";
 import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
-import { hexToRgb } from "@/utils/hexToRgb";
+import { generateRandomColor } from "@/utils/generateRandomColor";
 
 import "reactflow/dist/style.css";
 
@@ -47,7 +47,7 @@ export default function Flow() {
         id,
         title: "Ticket Title",
         description: "Ticket Description",
-        color: hexToRgb(),
+        color: generateRandomColor(),
       },
     };
 
