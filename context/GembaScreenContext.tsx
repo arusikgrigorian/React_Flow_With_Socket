@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   Dispatch,
@@ -16,12 +18,12 @@ type FullScreen = {
 };
 
 export const FullScreenContext = createContext<FullScreen>({
-  isFullScreen: true,
+  isFullScreen: false,
   setIsFullScreen: (prevState: SetStateAction<boolean>) => prevState,
 });
 
 export default function FullScreenProvider({ children }: Props) {
-  const [isFullScreen, setIsFullScreen] = useState<boolean>(true);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   return (
     <FullScreenContext.Provider value={{ isFullScreen, setIsFullScreen }}>
