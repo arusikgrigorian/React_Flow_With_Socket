@@ -24,11 +24,16 @@ const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 const nodeOrigin: NodeOrigin = [0.5, 0.5];
 const nodeTypes = { custom: CustomNode };
 
-export default function Flow() {
+type Props = {
+  nodes: Array<Node>;
+};
+
+export default function Flow({ nodes: defaultNodes }: Props) {
   const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
   const { fitView, project } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState<Array<Node>>([]);
+  const [nodes, setNodes, onNodesChange] =
+    useNodesState<Array<Node>>(defaultNodes);
 
   const onFitView = () => fitView({ duration: 400 });
 
@@ -39,14 +44,14 @@ export default function Flow() {
     const newCustomNode: Node = {
       id,
       position,
-      type: "custom",
+      type: "",
       deletable: true,
       draggable: true,
       selectable: true,
       data: {
         id,
         title: "Ticket Title",
-        description: "Ticket Description",
+        text: "Ticket Description",
         color: generateRandomColor(),
       },
     };

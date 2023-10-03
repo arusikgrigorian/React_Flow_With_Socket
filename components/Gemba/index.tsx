@@ -1,10 +1,17 @@
+"use client";
+
 import { ReactFlowProvider } from "reactflow";
+import { Node } from "reactflow";
 import Flow from "@/components/Gemba/components/Flow";
 
-export default function Gemba() {
+type Props = {
+  nodes: Array<Node>;
+};
+
+export default function Gemba({ nodes }: Props) {
   return (
     <ReactFlowProvider>
-      <Flow />
+      <Flow nodes={nodes} />
     </ReactFlowProvider>
   );
 }

@@ -13,7 +13,7 @@ import {
 type Data = {
   id: string;
   title: string;
-  description: string;
+  text: string;
   color: string;
 };
 
@@ -22,11 +22,11 @@ type Props = {
 };
 
 const CustomNode = memo(function CustomNode({ data }: Props) {
-  const { id, title = "", description = "", color } = data;
+  const { id, title = "", text = "", color } = data;
 
   const [form] = useForm();
 
-  const onFormItemChange = (itemName: "color" | "title" | "description") => {
+  const onFormItemChange = (itemName: "color" | "title" | "text") => {
     const isItemNameColor = itemName === "color";
 
     form
@@ -60,7 +60,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
         <Form
           className={"[&_.ant-form-item]:my-0"}
           form={form}
-          initialValues={{ title, description, color: convertRgbToHex(color) }}
+          initialValues={{ title, text, color: convertRgbToHex(color) }}
         >
           <Form.Item className={"absolute right-2 "} name={"color"}>
             <ColorPicker
@@ -93,13 +93,13 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
               </Form.Item>
             </>
           </Tooltip>
-          <Form.Item name={"description"}>
+          <Form.Item name={"text"}>
             <Input.TextArea
               autoSize
               bordered={false}
               className={getInputColor(color)}
               placeholder={"Type here"}
-              onChange={() => onFormItemChange("description")}
+              onChange={() => onFormItemChange("text")}
             />
           </Form.Item>
         </Form>
