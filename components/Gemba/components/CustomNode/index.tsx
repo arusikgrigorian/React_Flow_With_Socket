@@ -3,26 +3,21 @@ import { NodeToolbar } from "reactflow";
 import { Button, ColorPicker, Form, Input, Tooltip } from "antd";
 import { BgColorsOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
-import { convertRgbToHex } from "@/utils/convertRgbToHex";
 
 import {
   getInputColor,
   getOverlayInnerStyle,
 } from "@/utils/getCustomNodeStyles";
 
-type Data = {
-  id: string;
-  title: string;
-  text: string;
-  color: string;
-};
+import { convertRgbToHex } from "@/utils/convertRgbToHex";
+import { CustomNodeData } from "@/types";
 
 type Props = {
-  data: Data;
+  data: CustomNodeData;
 };
 
 const CustomNode = memo(function CustomNode({ data }: Props) {
-  const { id, title = "", text = "", color } = data;
+  const { id, title, text, color } = data;
 
   const inputColor = getInputColor(color);
   const tooltipColor = getOverlayInnerStyle(color);

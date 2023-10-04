@@ -1,19 +1,14 @@
-import { Node } from "reactflow";
 import Gemba from "@/components/Gemba";
+import { Result } from "@/types";
 
-type Props = {
-  results: Array<
-    Node & {
-      details: any;
-      color: any;
-      title: any;
-      text: any;
-      five_w_two_h: any;
-    }
-  >;
+type Response = {
+  count: number;
+  next: null;
+  previous: null;
+  results: Array<Result>;
 };
 
-const getGembaNotes = async (): Promise<Props> => {
+const getGembaNotes = async (): Promise<Response> => {
   const response = await fetch("", {
     headers: {
       Authorization: "Token ",
@@ -27,22 +22,26 @@ const getGembaNotes = async (): Promise<Props> => {
 export default async function Home() {
   const { results = [] } = await getGembaNotes();
 
-  const nodes = results.map((node) => {
-    return {
-      id: node.id,
-      type: "custom",
-      hidden: node.details.data.hidden,
-      position: node.details.data.position,
-      data: {
-        id: node.id,
-        color: node.color,
-        title: node.title,
-        text: node.text,
-        fiveWTwoHId: String(node.five_w_two_h),
-        hidden: node.details.data.hidden,
-      },
-    };
-  });
+  const nodes = results.map(
+    ({ id, type, title, text, color, five_w_two_h, details }) => {
+      const { hidden, position } = details.data;
+
+      return {
+        id,
+        type: type || "custom",
+        hidden: hidden,
+        position: position,
+        data: {
+          id,
+          color,
+          title,
+          text,
+          fiveWTwoHId: `${five_w_two_h}`,
+          hidden: hidden,
+        },
+      };
+    },
+  );
 
   return <Gemba nodes={nodes} />;
 }

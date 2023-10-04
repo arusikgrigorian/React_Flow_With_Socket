@@ -28,12 +28,12 @@ type Props = {
   nodes: Array<Node>;
 };
 
-export default function Flow({ nodes: defaultNodes }: Props) {
+export default function Flow({ nodes: initialNodes }: Props) {
   const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
   const { fitView, project } = useReactFlow();
   const [nodes, setNodes, onNodesChange] =
-    useNodesState<Array<Node>>(defaultNodes);
+    useNodesState<Array<Node>>(initialNodes);
 
   const onFitView = () => fitView({ duration: 400 });
 
@@ -50,7 +50,7 @@ export default function Flow({ nodes: defaultNodes }: Props) {
       selectable: true,
       data: {
         id,
-        title: "Ticket Title",
+        title: "",
         text: "",
         color: generateRandomColor(),
       },

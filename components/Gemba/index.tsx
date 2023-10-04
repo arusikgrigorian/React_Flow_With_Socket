@@ -1,7 +1,6 @@
 "use client";
 
-import { ReactFlowProvider } from "reactflow";
-import { Node } from "reactflow";
+import { ReactFlowProvider, Node } from "reactflow";
 import Flow from "@/components/Gemba/components/Flow";
 
 type Props = {
