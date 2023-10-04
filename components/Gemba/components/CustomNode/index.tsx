@@ -24,6 +24,10 @@ type Props = {
 const CustomNode = memo(function CustomNode({ data }: Props) {
   const { id, title = "", text = "", color } = data;
 
+  const inputColor = getInputColor(color);
+  const tooltipColor = getOverlayInnerStyle(color);
+  const pickerColor = convertRgbToHex(color);
+
   const [form] = useForm();
 
   const onFormItemChange = (itemName: "color" | "title" | "text") => {
@@ -60,7 +64,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
         <Form
           className={"[&_.ant-form-item]:my-0"}
           form={form}
-          initialValues={{ title, text, color: convertRgbToHex(color) }}
+          initialValues={{ title, text, color: pickerColor }}
         >
           <Form.Item className={"absolute right-2 "} name={"color"}>
             <ColorPicker
@@ -79,14 +83,14 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
           <Tooltip
             placement={"left"}
             color={`rgb(${color})`}
-            overlayInnerStyle={{ color: getOverlayInnerStyle(color) }}
+            overlayInnerStyle={{ color: tooltipColor }}
             title={title}
           >
             <>
               <Form.Item className={"w-40"} name={"title"}>
                 <Input
                   bordered={false}
-                  className={getInputColor(color)}
+                  className={inputColor}
                   placeholder={"Title"}
                   onChange={() => onFormItemChange("title")}
                 />
@@ -97,7 +101,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
             <Input.TextArea
               autoSize
               bordered={false}
-              className={getInputColor(color)}
+              className={inputColor}
               placeholder={"Type here"}
               onChange={() => onFormItemChange("text")}
             />

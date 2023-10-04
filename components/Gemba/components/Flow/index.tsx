@@ -44,14 +44,14 @@ export default function Flow({ nodes: defaultNodes }: Props) {
     const newCustomNode: Node = {
       id,
       position,
-      type: "",
+      type: "custom",
       deletable: true,
       draggable: true,
       selectable: true,
       data: {
         id,
         title: "Ticket Title",
-        text: "Ticket Description",
+        text: "",
         color: generateRandomColor(),
       },
     };

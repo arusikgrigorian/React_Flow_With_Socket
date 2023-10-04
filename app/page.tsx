@@ -15,7 +15,10 @@ type Props = {
 
 const getGembaNotes = async (): Promise<Props> => {
   const response = await fetch("", {
-    headers: {},
+    headers: {
+      Authorization: "Token ",
+      "Content-Type": "application/json",
+    },
   });
 
   return await response.json();
@@ -23,19 +26,20 @@ const getGembaNotes = async (): Promise<Props> => {
 
 export default async function Home() {
   const { results = [] } = await getGembaNotes();
-  const nodes = results.map((el) => {
+
+  const nodes = results.map((node) => {
     return {
-      id: el.id,
+      id: node.id,
       type: "custom",
-      hidden: el.details.data.hidden,
-      position: el.details.data.position,
+      hidden: node.details.data.hidden,
+      position: node.details.data.position,
       data: {
-        id: el.id,
-        color: el.color,
-        title: el.title,
-        text: el.text,
-        fiveWTwoHId: String(el.five_w_two_h),
-        hidden: el.details.data.hidden,
+        id: node.id,
+        color: node.color,
+        title: node.title,
+        text: node.text,
+        fiveWTwoHId: String(node.five_w_two_h),
+        hidden: node.details.data.hidden,
       },
     };
   });
