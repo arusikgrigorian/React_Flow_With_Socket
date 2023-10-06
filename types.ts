@@ -2,11 +2,12 @@ import { XYPosition } from "reactflow";
 
 export type CustomNodeData = {
   id: string;
-  color: string;
   title: string;
   text: string;
+  color: string;
   fiveWTwoHId: string;
   hidden: boolean;
+  userId: number;
 };
 
 export type Data = {
@@ -24,9 +25,9 @@ export type Result = {
   five_w_two_h: number;
   title: string;
   text: string;
+  color: string;
   details: Details;
   position: XYPosition | null;
   type: string | null;
   user: number;
-  color: string;
 };

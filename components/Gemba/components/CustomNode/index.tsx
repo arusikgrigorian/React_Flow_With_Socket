@@ -1,8 +1,13 @@
 import { memo } from "react";
-import { NodeToolbar } from "reactflow";
-import { Button, ColorPicker, Form, Input, Tooltip } from "antd";
-import { BgColorsOutlined, DeleteOutlined } from "@ant-design/icons";
+import { NodeToolbar, useReactFlow } from "reactflow";
+import { Button, ColorPicker, Form, Input, Modal, Tooltip } from "antd";
 import { useForm } from "antd/es/form/Form";
+
+import {
+  BgColorsOutlined,
+  DeleteOutlined,
+  ExclamationCircleFilled,
+} from "@ant-design/icons";
 
 import {
   getInputColor,
@@ -10,7 +15,10 @@ import {
 } from "@/utils/getCustomNodeStyles";
 
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
+import { formatRgbString } from "@/utils/formatRgbString";
 import { CustomNodeData } from "@/types";
+
+const { confirm } = Modal;
 
 type Props = {
   data: CustomNodeData;
@@ -24,30 +32,68 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
   const pickerColor = convertRgbToHex(color);
 
   const [form] = useForm();
+  const { setNodes } = useReactFlow();
 
-  const onFormItemChange = (itemName: "color" | "title" | "text") => {
-    const isItemNameColor = itemName === "color";
-
+  const onFormItemChange = (key: "title" | "text" | "color") => {
     form
       .validateFields()
-      .then((data) => {
-        console.log(
-          isItemNameColor ? data[itemName].toRgbString() : data[itemName],
-        );
+      .then((values) => {
+        setNodes((nodes) => {
+          return nodes.map((node) => {
+            if (node.id === id) {
+              const color =
+                key === "color" && formatRgbString(values[key].toRgbString());
+
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  [key]: color || values[key],
+                },
+              };
+            }
+
+            return node;
+          });
+        });
       })
       .catch(() => {
         return;
       });
   };
 
+  const onCustomNodeDelete = () => {
+    confirm({
+      centered: true,
+      title: "Are you sure delete this note?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk() {
+        setNodes((nodes) => {
+          return nodes.map((node) => {
+            if (node.id === id) {
+              return {
+                ...node,
+                hidden: true,
+              };
+            }
+            return node;
+          });
+        });
+      },
+    });
+  };
+
   return (
-    <div>
+    <>
       <NodeToolbar nodeId={id}>
         <Button
           danger
           type="primary"
           icon={<DeleteOutlined />}
-          onClick={() => undefined}
+          onClick={onCustomNodeDelete}
         >
           Delete
         </Button>
@@ -103,7 +149,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
           </Form.Item>
         </Form>
       </div>
-    </div>
+    </>
   );
 });
 
