@@ -1,4 +1,6 @@
 import { useCallback, useContext } from "react";
+import { Doc } from "yjs";
+import { WebrtcProvider } from "y-webrtc";
 
 import ReactFlow, {
   Background,
@@ -20,15 +22,23 @@ import { generateRandomColor } from "@/utils/generateRandomColor";
 
 import "reactflow/dist/style.css";
 
+const yDoc = new Doc();
+const yMap = yDoc.getMap("nodes");
+
+yMap.observeDeep(() => {
+  console.log("y-array updated: ", yMap.toJSON());
+});
+
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 const nodeOrigin: NodeOrigin = [0.5, 0.5];
 const nodeTypes = { custom: CustomNode };
 
 type Props = {
   nodes: Array<Node>;
+  id: string;
 };
 
-export default function Flow({ nodes: initialNodes }: Props) {
+export default function Flow({ nodes: initialNodes, id }: Props) {
   const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
   const { fitView, project } = useReactFlow();
@@ -36,6 +46,16 @@ export default function Flow({ nodes: initialNodes }: Props) {
     useNodesState<Array<Node>>(initialNodes);
 
   const onFitView = () => fitView({ duration: 400 });
+
+  const onFlowInitialization = useCallback(() => {
+    const provider = new WebrtcProvider(`gemba-collaboration-${id}`, yDoc, {
+      signaling: [`wss://api-roche-360.development.sentium.io/signal/${id}/`],
+    });
+
+    provider.on("synced", () => {
+      console.log("synced");
+    });
+  }, []);
 
   const onCustomNodeAdd = useCallback(() => {
     const id = getGembaCustomNodeId();
@@ -56,6 +76,7 @@ export default function Flow({ nodes: initialNodes }: Props) {
       },
     };
 
+    yMap.set(id, newCustomNode);
     setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
   }, [project]);
@@ -83,6 +104,7 @@ export default function Flow({ nodes: initialNodes }: Props) {
           minZoom={-Infinity}
           maxZoom={Infinity}
           proOptions={proOptions}
+          onInit={onFlowInitialization}
         >
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
           <Panel position={"top-left"}>

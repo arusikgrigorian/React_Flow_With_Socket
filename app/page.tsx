@@ -1,5 +1,7 @@
 import Gemba from "@/components/Gemba";
 import { Result } from "@/types";
+import { ENDPOINTS } from "@/api/types";
+import { BASE_URL, TOKEN } from "@/constants";
 
 type Response = {
   count: number;
@@ -8,21 +10,33 @@ type Response = {
   results: Array<Result>;
 };
 
-const getGembaNotes = async (): Promise<Response> => {
-  const response = await fetch("", {
-    headers: {
-      Authorization: "Token ",
-      "Content-Type": "application/json",
+type Params = {
+  id: string;
+};
+
+type Props = {
+  params: Params;
+};
+
+const getGembaNotes = async (id: string): Promise<Response> => {
+  const response = await fetch(
+    `${BASE_URL}/${ENDPOINTS.gembaNote}/?all=true&five_w_two_h=${id}`,
+    {
+      cache: "no-cache",
+      headers: {
+        Authorization: `Token ${TOKEN}`,
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   return await response.json();
 };
 
-export default async function Home() {
-  const { results = [] } = await getGembaNotes();
+export default async function Home({ params: { id = "4" } }: Props) {
+  const { results } = await getGembaNotes(id);
 
-  const nodes = results.map(
+  const nodes = results?.map(
     ({ id, type, title, text, color, five_w_two_h, details, user }) => {
       const { position } = details.data;
 
@@ -42,5 +56,5 @@ export default async function Home() {
     },
   );
 
-  return <Gemba nodes={nodes} />;
+  return <Gemba nodes={nodes} id={id} />;
 }
