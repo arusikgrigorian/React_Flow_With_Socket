@@ -33,17 +33,17 @@ const getGembaNotes = async (id: string): Promise<Response> => {
   return await response.json();
 };
 
-export default async function Home({ params: { id = "4" } }: Props) {
+export default async function Home({ params: { id = "39" } }: Props) {
   const { results } = await getGembaNotes(id);
 
   const nodes = results?.map(
-    ({ id, type, title, text, color, five_w_two_h, details, user }) => {
+    ({ id, title, text, color, five_w_two_h, details, user }) => {
       const { position } = details.data;
 
       return {
         id,
         position,
-        type: type || "custom",
+        type: "customEditor",
         data: {
           id,
           title,

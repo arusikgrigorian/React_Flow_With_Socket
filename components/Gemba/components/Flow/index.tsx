@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { Doc } from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 
@@ -25,13 +25,9 @@ import "reactflow/dist/style.css";
 const yDoc = new Doc();
 const yMap = yDoc.getMap("nodes");
 
-yMap.observeDeep(() => {
-  console.log("y-array updated: ", yMap.toJSON());
-});
-
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 const nodeOrigin: NodeOrigin = [0.5, 0.5];
-const nodeTypes = { custom: CustomNode };
+const nodeTypes = { customEditor: CustomNode };
 
 type Props = {
   nodes: Array<Node>;
@@ -45,17 +41,25 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
 
+  useEffect(() => {
+    const nodeChanges = () => setNodes(() => Array.from(yMap.values()));
+
+    yMap.observe(nodeChanges);
+
+    return () => yMap.unobserve(nodeChanges);
+  }, [setNodes]);
+
   const onFitView = () => fitView({ duration: 400 });
 
-  const onFlowInitialization = useCallback(() => {
+  const onFlowInitialization = () => {
     const provider = new WebrtcProvider(`gemba-collaboration-${id}`, yDoc, {
       signaling: [`wss://api-roche-360.development.sentium.io/signal/${id}/`],
     });
 
-    provider.on("synced", () => {
-      console.log("synced");
+    provider.on("synced", (synced: { synced: boolean }) => {
+      console.log("synced", synced);
     });
-  }, []);
+  };
 
   const onCustomNodeAdd = useCallback(() => {
     const id = getGembaCustomNodeId();
@@ -64,7 +68,7 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     const newCustomNode: Node = {
       id,
       position,
-      type: "custom",
+      type: "customEditor",
       deletable: true,
       draggable: true,
       selectable: true,
@@ -77,7 +81,7 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     };
 
     yMap.set(id, newCustomNode);
-    setNodes((nds) => nds.concat(newCustomNode));
+    // setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
   }, [project]);
 

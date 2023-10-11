@@ -22,9 +22,10 @@ const { confirm } = Modal;
 
 type Props = {
   data: CustomNodeData;
+  dragging: boolean;
 };
 
-const CustomNode = memo(function CustomNode({ data }: Props) {
+const CustomNode = memo(function CustomNode({ data, dragging }: Props) {
   const { id, title, text, color } = data;
 
   const inputColor = getInputColor(color);
