@@ -16,14 +16,22 @@ const config: Config = {
       },
     },
     colors: {
+      transparent: "transparent",
       blue: {
         2: "var(--color-blue-2)",
         5: "var(--color-blue-5)",
         6: "var(--color-blue-6)",
       },
+      red: {
+        1: "var(--color-red-1)",
+        2: "var(--color-red-2)",
+      },
       gray: {
+        1: "var(--color-gray-1)",
+        3: "var(--color-gray-3)",
         5: "var(--color-gray-5)",
         6: "var(--color-gray-6)",
+        10: "var(--color-gray-10)",
       },
     },
     borderRadius: {
@@ -31,6 +39,5 @@ const config: Config = {
     },
   },
   plugins: [],
-  important: true,
 };
 export default config;

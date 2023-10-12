@@ -1,9 +1,10 @@
-import { Button, Space } from "antd";
 import {
   CompressOutlined,
   FullscreenExitOutlined,
   FullscreenOutlined,
 } from "@ant-design/icons";
+
+import t from "@/utils/translate";
 
 type Props = {
   isFullScreen: boolean;
@@ -25,28 +26,32 @@ export default function FlowPanel({
   );
 
   return (
-    <Space size={8}>
-      <Button
-        className={"btn-primary"}
-        type={"primary"}
+    <div className={"flex gap-2"}>
+      <button
+        className={"btn-primary transition-500"}
+        type={"button"}
         onClick={onCustomNodeAdd}
       >
-        Add New
-      </Button>
-      <Button
-        className={"btn-default"}
-        icon={<CompressOutlined />}
+        {t("Add New")}
+      </button>
+      <button
+        className={"btn-default btn-icon transition-500"}
+        type={"button"}
         onClick={onFitView}
       >
-        Fit View
-      </Button>
-      <Button
-        className={"btn-default"}
-        icon={ViewIcon}
+        <i>
+          <CompressOutlined />
+        </i>
+        <span>{t("Fit View")}</span>
+      </button>
+      <button
+        className={"btn-default btn-icon transition-500"}
+        type={"button"}
         onClick={onScreenSizeChange}
       >
-        {isFullScreen ? "Shrink" : "Expand"}
-      </Button>
-    </Space>
+        <i>{ViewIcon}</i>
+        <span>{t(isFullScreen ? "Shrink" : "Expand")}</span>
+      </button>
+    </div>
   );
 }

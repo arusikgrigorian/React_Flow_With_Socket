@@ -1,12 +1,13 @@
 import { memo } from "react";
-import { NodeToolbar, useReactFlow } from "reactflow";
-import { Button, ColorPicker, Form, Input, Modal, Tooltip } from "antd";
+import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
+import { Modal, Tooltip } from "antd";
 import { useForm } from "antd/es/form/Form";
 
 import {
   BgColorsOutlined,
   DeleteOutlined,
   ExclamationCircleFilled,
+  FullscreenOutlined,
 } from "@ant-design/icons";
 
 import {
@@ -16,6 +17,7 @@ import {
 
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { formatRgbString } from "@/utils/formatRgbString";
+import t from "@/utils/translate";
 import { CustomNodeData } from "@/types";
 
 const { confirm } = Modal;
@@ -25,7 +27,7 @@ type Props = {
   dragging: boolean;
 };
 
-const CustomNode = memo(function CustomNode({ data, dragging }: Props) {
+const CustomNode = memo(function CustomNode({ data }: Props) {
   const { id, title, text, color } = data;
 
   const inputColor = getInputColor(color);
@@ -90,65 +92,63 @@ const CustomNode = memo(function CustomNode({ data, dragging }: Props) {
   return (
     <>
       <NodeToolbar nodeId={id}>
-        <Button
-          danger
-          type="primary"
-          icon={<DeleteOutlined />}
+        <button
+          className={"btn-danger btn-icon transition-500"}
+          type="button"
           onClick={onCustomNodeDelete}
         >
-          Delete
-        </Button>
+          <i>
+            <DeleteOutlined />
+          </i>
+          <span>{t("Delete")}</span>
+        </button>
       </NodeToolbar>
+      <NodeResizeControl minWidth={300} maxWidth={500} minHeight={300}>
+        <FullscreenOutlined />
+      </NodeResizeControl>
       <div
         style={{ backgroundColor: `rgba(${color},0.8)` }}
-        className={`min-h-[200px] p-2 outline-none rounded-default`}
+        className={`flex min-h-[300px] h-full p-2 outline-none rounded-default`}
       >
-        <Form
-          className={"[&_.ant-form-item]:my-0"}
-          form={form}
-          initialValues={{ title, text, color: pickerColor }}
-        >
-          <Form.Item className={"absolute right-2 "} name={"color"}>
-            <ColorPicker
-              disabledAlpha
-              defaultFormat={"rgb"}
+        <form className={"flex flex-col gap-2 w-full"}>
+          <div className={"absolute right-2"}>
+            <label>
+              <BgColorsOutlined style={{ color: `rgb(${color}` }} />
+            </label>
+            <input
+              name={"color"}
+              type={"color"}
+              placeholder={""}
+              value={pickerColor}
               onChange={() => onFormItemChange("color")}
+            />
+          </div>
+          <div className={"w-full"}>
+            <Tooltip
+              placement={"left"}
+              color={`rgb(${color})`}
+              overlayInnerStyle={{ color: tooltipColor }}
+              title={title}
             >
-              <Button
-                shape={"circle"}
-                style={{ borderColor: `rgb(${color}` }}
-                className={"shadow-none"}
-                icon={<BgColorsOutlined style={{ color: `rgb(${color}` }} />}
+              <input
+                className={`${inputColor} w-[80%] bg-transparent outline-none `}
+                name={"title"}
+                placeholder={"Title"}
+                value={title}
+                onChange={() => onFormItemChange("title")}
               />
-            </ColorPicker>
-          </Form.Item>
-          <Tooltip
-            placement={"left"}
-            color={`rgb(${color})`}
-            overlayInnerStyle={{ color: tooltipColor }}
-            title={title}
-          >
-            <>
-              <Form.Item className={"w-40"} name={"title"}>
-                <Input
-                  bordered={false}
-                  className={inputColor}
-                  placeholder={"Title"}
-                  onChange={() => onFormItemChange("title")}
-                />
-              </Form.Item>
-            </>
-          </Tooltip>
-          <Form.Item name={"text"}>
-            <Input.TextArea
-              autoSize
-              bordered={false}
-              className={inputColor}
+            </Tooltip>
+          </div>
+          <div className={"flex-grow"}>
+            <textarea
+              className={`${inputColor} w-full h-full bg-transparent outline-none resize-none overflow-hidden`}
+              name={"text"}
               placeholder={"Type here"}
+              value={text}
               onChange={() => onFormItemChange("text")}
             />
-          </Form.Item>
-        </Form>
+          </div>
+        </form>
       </div>
     </>
   );

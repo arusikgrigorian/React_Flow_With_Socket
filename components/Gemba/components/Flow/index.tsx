@@ -42,12 +42,18 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     useNodesState<Array<Node>>(initialNodes);
 
   useEffect(() => {
+    initialNodes.map((initialNode) => {
+      yMap.set(initialNode.id, initialNode);
+    });
+  }, []);
+
+  useEffect(() => {
     const nodeChanges = () => setNodes(() => Array.from(yMap.values()));
 
     yMap.observe(nodeChanges);
 
     return () => yMap.unobserve(nodeChanges);
-  }, [setNodes]);
+  }, []);
 
   const onFitView = () => fitView({ duration: 400 });
 
@@ -81,7 +87,6 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     };
 
     yMap.set(id, newCustomNode);
-    // setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
   }, [project]);
 

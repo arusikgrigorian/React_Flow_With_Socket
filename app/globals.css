@@ -7,17 +7,46 @@
     --color-blue-5: #1d7fe0;
     --color-blue-6: #0066cc;
 
+    --color-red-1: #dd1f1f;
+    --color-red-2: #e96363;
+
+    --color-gray-1: #ffffff;
+    --color-gray-3: #d3d6de;
     --color-gray-5: #83848a;
     --color-gray-6: #4a4a4e;
+    --color-gray-10: #000000;
 }
 
 @layer components {
-    .btn-default {
-        @apply text-gray-6 hover:border-blue-5 hover:text-blue-5 !important
+     .btn-primary {
+        @apply
+        bg-blue-6 hover:bg-blue-5
+        py-1 px-4 rounded-default
+        text-gray-1 text-sm
     }
 
-    .btn-primary {
-        @apply bg-blue-6 hover:bg-blue-5 !important
+    .btn-default {
+        @apply
+        bg-gray-1 py-1 px-4
+        border border-solid border-gray-3 hover:border-blue-5 rounded-default
+        text-gray-6 hover:text-blue-5 text-sm
+    }
+
+    .btn-danger {
+        @apply
+        bg-red-1 hover:bg-red-2
+        py-1 px-4 rounded-default
+        text-gray-1 text-sm
+    }
+
+    .btn-icon {
+        @apply
+        flex gap-2 justify-center items-center;
+    }
+
+    .transition-500 {
+        @apply
+        transition ease-in-out duration-500;
     }
 }
 

@@ -33,7 +33,7 @@ const getGembaNotes = async (id: string): Promise<Response> => {
   return await response.json();
 };
 
-export default async function Home({ params: { id = "39" } }: Props) {
+export default async function Home({ params: { id = "40" } }: Props) {
   const { results } = await getGembaNotes(id);
 
   const nodes = results?.map(
