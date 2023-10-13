@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="JSHintConfiguration" version="2.13.6" use-config-file="false">
+  <component name="JSHintConfiguration" version="2.13.6" use-config-file="true" use-custom-config-file="true" custom-config-file-path="$PROJECT_DIR$/.jshintrc">
     <option asi="false" />
     <option bitwise="true" />
     <option boss="false" />
@@ -45,7 +45,7 @@
     <option newcap="true" />
     <option noarg="true" />
     <option nocomma="true" />
-    <option node="false" />
+    <option node="true" />
     <option noempty="true" />
     <option nomen="false" />
     <option nonbsp="false" />

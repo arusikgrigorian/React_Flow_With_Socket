@@ -1,3 +1,3 @@
-export default function t(key: string): string {
+export function t(key: string): string {
   return key;
 }

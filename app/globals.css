@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
     --color-blue-2: #e9f4ff;
     --color-blue-5: #1d7fe0;
@@ -15,6 +16,14 @@
     --color-gray-5: #83848a;
     --color-gray-6: #4a4a4e;
     --color-gray-10: #000000;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper{
+    padding:0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 100%;
 }
 
 @layer components {
@@ -44,9 +53,10 @@
         flex gap-2 justify-center items-center;
     }
 
-    .transition-500 {
+    .transition-300 {
         @apply
-        transition ease-in-out duration-500;
+        transition ease-in-out duration-300;
     }
 }
+
 

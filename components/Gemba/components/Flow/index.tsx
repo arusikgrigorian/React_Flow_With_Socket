@@ -18,6 +18,7 @@ import CustomNode from "../CustomNode";
 import FlowPanel from "../FlowPanel";
 import { FullScreenContext } from "@/context/GembaScreenContext";
 import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
+import { convertHexToRgb } from "@/utils/convertHexToRgb";
 import { generateRandomColor } from "@/utils/generateRandomColor";
 
 import "reactflow/dist/style.css";
@@ -45,7 +46,7 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     initialNodes.map((initialNode) => {
       yMap.set(initialNode.id, initialNode);
     });
-  }, []);
+  }, [initialNodes]);
 
   useEffect(() => {
     const nodeChanges = () => setNodes(() => Array.from(yMap.values()));
@@ -53,9 +54,7 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     yMap.observe(nodeChanges);
 
     return () => yMap.unobserve(nodeChanges);
-  }, []);
-
-  const onFitView = () => fitView({ duration: 400 });
+  }, [setNodes]);
 
   const onFlowInitialization = () => {
     const provider = new WebrtcProvider(`gemba-collaboration-${id}`, yDoc, {
@@ -66,6 +65,8 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
       console.log("synced", synced);
     });
   };
+
+  const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
   const onCustomNodeAdd = useCallback(() => {
     const id = getGembaCustomNodeId();
@@ -82,13 +83,13 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
         id,
         title: "",
         text: "",
-        color: generateRandomColor(),
+        color: convertHexToRgb(generateRandomColor()),
       },
     };
 
     yMap.set(id, newCustomNode);
     setTimeout(onFitView, 100);
-  }, [project]);
+  }, [project, onFitView]);
 
   const onScreenSizeChange = () => {
     setIsFullScreen(!isFullScreen);

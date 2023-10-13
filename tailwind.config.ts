@@ -36,6 +36,7 @@ const config: Config = {
     },
     borderRadius: {
       default: "8px",
+      full: "100%",
     },
   },
   plugins: [],

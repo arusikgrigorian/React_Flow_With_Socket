@@ -1,7 +1,6 @@
-import { memo } from "react";
+import { ChangeEvent, memo } from "react";
 import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
 import { Modal, Tooltip } from "antd";
-import { useForm } from "antd/es/form/Form";
 
 import {
   BgColorsOutlined,
@@ -15,9 +14,9 @@ import {
   getOverlayInnerStyle,
 } from "@/utils/getCustomNodeStyles";
 
+import { t } from "@/utils/translate";
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
-import { formatRgbString } from "@/utils/formatRgbString";
-import t from "@/utils/translate";
+import { convertHexToRgb } from "@/utils/convertHexToRgb";
 import { CustomNodeData } from "@/types";
 
 const { confirm } = Modal;
@@ -34,45 +33,41 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
   const tooltipColor = getOverlayInnerStyle(color);
   const pickerColor = convertRgbToHex(color);
 
-  const [form] = useForm();
   const { setNodes } = useReactFlow();
 
-  const onFormItemChange = (key: "title" | "text" | "color") => {
-    form
-      .validateFields()
-      .then((values) => {
-        setNodes((nodes) => {
-          return nodes.map((node) => {
-            if (node.id === id) {
-              const color =
-                key === "color" && formatRgbString(values[key].toRgbString());
+  const onFormItemChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    key: "title" | "text" | "color",
+  ) => {
+    const value = e.target.value;
 
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  [key]: color || values[key],
-                },
-              };
-            }
+    setNodes((nodes) => {
+      return nodes.map((node) => {
+        if (node.id === id) {
+          const color = key === "color" && convertHexToRgb(value);
 
-            return node;
-          });
-        });
-      })
-      .catch(() => {
-        return;
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              [key]: color || value,
+            },
+          };
+        }
+
+        return node;
       });
+    });
   };
 
   const onCustomNodeDelete = () => {
     confirm({
       centered: true,
-      title: "Are you sure delete this note?",
+      title: t("Are you sure delete this note?"),
       icon: <ExclamationCircleFilled />,
-      okText: "Delete",
+      okText: t("Delete"),
       okType: "danger",
-      cancelText: "Cancel",
+      cancelText: t("Cancel"),
       onOk() {
         setNodes((nodes) => {
           return nodes.map((node) => {
@@ -93,7 +88,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
     <>
       <NodeToolbar nodeId={id}>
         <button
-          className={"btn-danger btn-icon transition-500"}
+          className={"btn-danger btn-icon transition-300"}
           type="button"
           onClick={onCustomNodeDelete}
         >
@@ -103,24 +98,40 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
           <span>{t("Delete")}</span>
         </button>
       </NodeToolbar>
-      <NodeResizeControl minWidth={300} maxWidth={500} minHeight={300}>
-        <FullscreenOutlined />
+      <NodeResizeControl
+        style={{ background: "transparent", border: "none" }}
+        minWidth={400}
+        maxWidth={800}
+        minHeight={400}
+      >
+        <FullscreenOutlined
+          style={{ color: `white` }} //isLight ? 'dark' : 'light'
+          className={"absolute bottom-2 right-2"}
+        />
       </NodeResizeControl>
       <div
         style={{ backgroundColor: `rgba(${color},0.8)` }}
-        className={`flex min-h-[300px] h-full p-2 outline-none rounded-default`}
+        className={`flex min-w-[400px] min-h-[400px] h-full p-2 outline-none rounded-default`}
       >
-        <form className={"flex flex-col gap-2 w-full"}>
-          <div className={"absolute right-2"}>
-            <label>
+        <form className={"flex flex-col gap-4 w-full"}>
+          <div className={"absolute right-10"}>
+            <label
+              style={{ borderColor: `rgb(${color}` }}
+              className={
+                "inline-flex justify-center items-center w-8 h-8 border border-solid bg-gray-1 rounded-full p-1.5 absolute"
+              }
+            >
               <BgColorsOutlined style={{ color: `rgb(${color}` }} />
             </label>
             <input
+              className={
+                "w-8 h-8 rounded-full color-picker absolute opacity-0 cursor-pointer"
+              }
               name={"color"}
               type={"color"}
               placeholder={""}
               value={pickerColor}
-              onChange={() => onFormItemChange("color")}
+              onChange={(e) => onFormItemChange(e, "color")}
             />
           </div>
           <div className={"w-full"}>
@@ -135,7 +146,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
                 name={"title"}
                 placeholder={"Title"}
                 value={title}
-                onChange={() => onFormItemChange("title")}
+                onChange={(e) => onFormItemChange(e, "title")}
               />
             </Tooltip>
           </div>
@@ -145,7 +156,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
               name={"text"}
               placeholder={"Type here"}
               value={text}
-              onChange={() => onFormItemChange("text")}
+              onChange={(e) => onFormItemChange(e, "text")}
             />
           </div>
         </form>

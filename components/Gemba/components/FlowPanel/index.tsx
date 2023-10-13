@@ -4,7 +4,7 @@ import {
   FullscreenOutlined,
 } from "@ant-design/icons";
 
-import t from "@/utils/translate";
+import { t } from "@/utils/translate";
 
 type Props = {
   isFullScreen: boolean;
@@ -28,14 +28,14 @@ export default function FlowPanel({
   return (
     <div className={"flex gap-2"}>
       <button
-        className={"btn-primary transition-500"}
+        className={"btn-primary transition-300"}
         type={"button"}
         onClick={onCustomNodeAdd}
       >
         {t("Add New")}
       </button>
       <button
-        className={"btn-default btn-icon transition-500"}
+        className={"btn-default btn-icon transition-300"}
         type={"button"}
         onClick={onFitView}
       >
@@ -45,7 +45,7 @@ export default function FlowPanel({
         <span>{t("Fit View")}</span>
       </button>
       <button
-        className={"btn-default btn-icon transition-500"}
+        className={"btn-default btn-icon transition-300"}
         type={"button"}
         onClick={onScreenSizeChange}
       >
