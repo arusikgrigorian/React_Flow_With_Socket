@@ -35,7 +35,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
 
   const { setNodes } = useReactFlow();
 
-  const onFormItemChange = (
+  const onCustomNodeChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: "title" | "text" | "color",
   ) => {
@@ -105,16 +105,16 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
         minHeight={400}
       >
         <FullscreenOutlined
-          style={{ color: `white` }} //isLight ? 'dark' : 'light'
+          style={{ color: tooltipColor }}
           className={"absolute bottom-2 right-2"}
         />
       </NodeResizeControl>
       <div
         style={{ backgroundColor: `rgba(${color},0.8)` }}
-        className={`flex min-w-[400px] min-h-[400px] h-full p-2 outline-none rounded-default`}
+        className={`flex min-w-[400px] min-h-[400px] h-full px-4 py-6 outline-none rounded-default`}
       >
         <form className={"flex flex-col gap-4 w-full"}>
-          <div className={"absolute right-10"}>
+          <div className={"absolute top-4 right-12"}>
             <label
               style={{ borderColor: `rgb(${color}` }}
               className={
@@ -131,7 +131,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
               type={"color"}
               placeholder={""}
               value={pickerColor}
-              onChange={(e) => onFormItemChange(e, "color")}
+              onChange={(e) => onCustomNodeChange(e, "color")}
             />
           </div>
           <div className={"w-full"}>
@@ -142,11 +142,11 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
               title={title}
             >
               <input
-                className={`${inputColor} w-[80%] bg-transparent outline-none `}
+                className={`${inputColor} w-[85%] bg-transparent outline-none `}
                 name={"title"}
                 placeholder={"Title"}
                 value={title}
-                onChange={(e) => onFormItemChange(e, "title")}
+                onChange={(e) => onCustomNodeChange(e, "title")}
               />
             </Tooltip>
           </div>
@@ -156,7 +156,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
               name={"text"}
               placeholder={"Type here"}
               value={text}
-              onChange={(e) => onFormItemChange(e, "text")}
+              onChange={(e) => onCustomNodeChange(e, "text")}
             />
           </div>
         </form>
