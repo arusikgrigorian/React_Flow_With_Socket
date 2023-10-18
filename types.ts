@@ -1,5 +1,17 @@
 import { XYPosition } from "reactflow";
 
+export type Param = {
+  all?: boolean;
+  five_w_two_h?: string;
+};
+
+export type Result = {
+  count: number;
+  next: null;
+  previous: null;
+  results: Array<Node>;
+};
+
 export type CustomNodeData = {
   id: string;
   title: string;
@@ -16,17 +28,17 @@ export type Data = {
   fiveWTwoHId: number;
 };
 
-export type Details = {
+export type Detail = {
   data: Data;
 };
 
-export type Result = {
+export type Node = {
   id: string;
   five_w_two_h: number;
   title: string;
   text: string;
   color: string;
-  details: Details;
+  details: Detail;
   position: XYPosition | null;
   type: string | null;
   user: number;

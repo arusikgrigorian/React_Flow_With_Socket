@@ -1,4 +1,5 @@
 import { ChangeEvent, memo } from "react";
+import useWebSocket from "react-use-websocket";
 import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
 import { Modal, Tooltip } from "antd";
 
@@ -17,6 +18,7 @@ import {
 import { t } from "@/utils/translate";
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
+import { VITE_APP_SOCKET_URL } from "@/constants";
 import { CustomNodeData } from "@/types";
 
 const { confirm } = Modal;
@@ -34,6 +36,14 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
   const pickerColor = convertRgbToHex(color);
 
   const { setNodes } = useReactFlow();
+
+  const { sendJsonMessage } = useWebSocket(
+    `${VITE_APP_SOCKET_URL}/socket/5w2h/${id}/`,
+    {
+      share: true,
+      shouldReconnect: () => false,
+    },
+  );
 
   const onCustomNodeChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

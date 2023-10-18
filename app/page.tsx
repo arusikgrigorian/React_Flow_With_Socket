@@ -1,14 +1,7 @@
 import Gemba from "@/components/Gemba";
-import { Result } from "@/types";
+import httpClient from "@/services/rest";
+import { TOKEN } from "@/constants";
 import { ENDPOINTS } from "@/api/types";
-import { BASE_URL, TOKEN } from "@/constants";
-
-type Response = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Array<Result>;
-};
 
 type Params = {
   id: string;
@@ -18,23 +11,13 @@ type Props = {
   params: Params;
 };
 
-const getGembaNotes = async (id: string): Promise<Response> => {
-  const response = await fetch(
-    `${BASE_URL}/${ENDPOINTS.gembaNote}/?all=true&five_w_two_h=${id}`,
-    {
-      cache: "no-cache",
-      headers: {
-        Authorization: `Token ${TOKEN}`,
-        "Content-Type": "application/json",
-      },
-    },
-  );
-
-  return await response.json();
-};
-
 export default async function Home({ params: { id = "40" } }: Props) {
-  const { results } = await getGembaNotes(id);
+  httpClient.token = TOKEN;
+
+  const { results } = await httpClient.get(ENDPOINTS.gembaNote, {
+    all: true,
+    five_w_two_h: id,
+  });
 
   const nodes = results?.map(
     ({ id, title, text, color, five_w_two_h, details, user }) => {
@@ -43,7 +26,7 @@ export default async function Home({ params: { id = "40" } }: Props) {
       return {
         id,
         position,
-        type: "customEditor",
+        type: "custom",
         data: {
           id,
           title,

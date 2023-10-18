@@ -1,6 +1,5 @@
-import { useCallback, useContext, useEffect } from "react";
-import { Doc } from "yjs";
-import { WebrtcProvider } from "y-webrtc";
+import { useCallback, useContext } from "react";
+// import useWebSocket from "react-use-websocket";
 
 import ReactFlow, {
   Background,
@@ -23,12 +22,9 @@ import { generateRandomColor } from "@/utils/generateRandomColor";
 
 import "reactflow/dist/style.css";
 
-const yDoc = new Doc();
-const yMap = yDoc.getMap("nodes");
-
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 const nodeOrigin: NodeOrigin = [0.5, 0.5];
-const nodeTypes = { customEditor: CustomNode };
+const nodeTypes = { custom: CustomNode };
 
 type Props = {
   nodes: Array<Node>;
@@ -42,30 +38,6 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
 
-  useEffect(() => {
-    initialNodes.map((initialNode) => {
-      yMap.set(initialNode.id, initialNode);
-    });
-  }, [initialNodes]);
-
-  useEffect(() => {
-    const nodeChanges = () => setNodes(() => Array.from(yMap.values()));
-
-    yMap.observe(nodeChanges);
-
-    return () => yMap.unobserve(nodeChanges);
-  }, [setNodes]);
-
-  const onFlowInitialization = () => {
-    const provider = new WebrtcProvider(`gemba-collaboration-${id}`, yDoc, {
-      signaling: [`wss://api-roche-360.development.sentium.io/signal/${id}/`],
-    });
-
-    provider.on("synced", (synced: { synced: boolean }) => {
-      console.log("synced", synced);
-    });
-  };
-
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
   const onCustomNodeAdd = useCallback(() => {
@@ -75,7 +47,7 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
     const newCustomNode: Node = {
       id,
       position,
-      type: "customEditor",
+      type: "custom",
       deletable: true,
       draggable: true,
       selectable: true,
@@ -87,9 +59,9 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
       },
     };
 
-    yMap.set(id, newCustomNode);
+    setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
-  }, [project, onFitView]);
+  }, [project, setNodes, onFitView]);
 
   const onScreenSizeChange = () => {
     setIsFullScreen(!isFullScreen);
@@ -114,7 +86,6 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
           minZoom={-Infinity}
           maxZoom={Infinity}
           proOptions={proOptions}
-          onInit={onFlowInitialization}
         >
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
           <Panel position={"top-left"}>
