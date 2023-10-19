@@ -128,7 +128,7 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
             <label
               style={{ borderColor: `rgb(${color}` }}
               className={
-                "inline-flex justify-center items-center w-8 h-8 border border-solid bg-gray-1 rounded-full p-1.5 absolute"
+                "inline-flex-centered w-8 h-8 border border-solid bg-gray-1 rounded-full p-1.5 absolute"
               }
             >
               <BgColorsOutlined style={{ color: `rgb(${color}` }} />

@@ -11,33 +11,27 @@ class HttpClient {
   static readonly BASE_URL: string = BASE_URL;
   static readonly INIT: RequestInit = REQUEST_INIT;
 
-  initialization: RequestInit;
+  init: RequestInit;
   _token: string;
 
   constructor(options?: Option) {
-    this.initialization = options?.init || HttpClient.INIT;
+    this.init = options?.init || HttpClient.INIT;
     this._token = "";
   }
 
-  set token(token: string) {
+  set authToken(token: string) {
     this._token = `Token ${token}`;
   }
 
   async _request<T = Result>(endpoint: string, params?: Param): Promise<T> {
-    const url: URL = getUrlWithParams(
-      `${HttpClient.BASE_URL}/${endpoint}`,
-      params,
-    );
-
-    const init = {
-      ...this.initialization,
-      headers: { ...this.initialization.headers, Authorization: this._token },
-    };
+    const url = getUrlWithParams(HttpClient.BASE_URL, endpoint, params);
+    const headers = { ...this.init.headers, Authorization: this._token };
+    const init = { ...this.init, headers };
 
     const response: Response = await fetch(url, init);
 
     if (!response.ok) {
-      throw new Error();
+      throw new Error("Something went wrong!");
     }
 
     return response.json();

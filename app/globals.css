@@ -57,6 +57,16 @@ input[type="color"]::-webkit-color-swatch {
         @apply
         transition ease-in-out duration-300;
     }
+
+    .flex-centered {
+        @apply
+        flex justify-center items-center
+    }
+
+    .inline-flex-centered {
+        @apply
+        inline-flex justify-center items-center
+    }
 }
 
 

@@ -12,7 +12,9 @@ type Props = {
 };
 
 export default async function Home({ params: { id = "40" } }: Props) {
-  httpClient.token = TOKEN;
+  // token can be got from the storage/context and set via setter (in a component)
+  // token can be got from the cookies and set right in HttpClient class constructor
+  httpClient.authToken = TOKEN;
 
   const { results } = await httpClient.get(ENDPOINTS.gembaNote, {
     all: true,
