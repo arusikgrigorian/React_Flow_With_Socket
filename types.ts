@@ -17,8 +17,7 @@ export type CustomNodeData = {
   title: string;
   text: string;
   color: string;
-  fiveWTwoHId: string;
-  hidden: boolean;
+  fiveWTwoHId: number;
   userId: number;
 };
 

@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Gemba",
-  description: "Gemba Interactive Flow",
+  description: "Gemba Flow",
 };
 
 export type Props = {

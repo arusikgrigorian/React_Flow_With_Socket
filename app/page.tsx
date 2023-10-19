@@ -1,6 +1,5 @@
 import Gemba from "@/components/Gemba";
 import httpClient from "@/services/rest";
-import { TOKEN } from "@/constants";
 import { ENDPOINTS } from "@/api/types";
 
 type Params = {
@@ -11,15 +10,12 @@ type Props = {
   params: Params;
 };
 
-export default async function Home({ params: { id = "40" } }: Props) {
-  // token can be got from the storage/context and set via setter (in a component)
-  // token can be got from the cookies and set right in HttpClient class constructor
-  httpClient.authToken = TOKEN;
+export default async function Home({ params: { id = "47" } }: Props) {
+  // TODO -> user id can be got here from the cookies (server)
+  const userId = 1;
+  const params = { all: true, five_w_two_h: id };
 
-  const { results } = await httpClient.get(ENDPOINTS.gembaNote, {
-    all: true,
-    five_w_two_h: id,
-  });
+  const { results } = await httpClient.get(ENDPOINTS.gembaNote, params);
 
   const nodes = results?.map(
     ({ id, title, text, color, five_w_two_h, details, user }) => {
@@ -41,5 +37,5 @@ export default async function Home({ params: { id = "40" } }: Props) {
     },
   );
 
-  return <Gemba nodes={nodes} id={id} />;
+  return <Gemba nodes={nodes} IcId={id} userId={userId} />;
 }

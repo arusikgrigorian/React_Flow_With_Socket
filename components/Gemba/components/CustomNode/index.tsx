@@ -1,6 +1,6 @@
-import { ChangeEvent, memo } from "react";
+import { ChangeEvent, memo, useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
-import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
+import { Node, NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
 import { Modal, Tooltip } from "antd";
 
 import {
@@ -18,38 +18,72 @@ import {
 import { t } from "@/utils/translate";
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
-import { VITE_APP_SOCKET_URL } from "@/constants";
+import { SOCKET_URL } from "@/constants";
 import { CustomNodeData } from "@/types";
 
 const { confirm } = Modal;
 
 type Props = {
   data: CustomNodeData;
-  dragging: boolean;
+  xPos: number;
+  yPos: number;
 };
 
-const CustomNode = memo(function CustomNode({ data }: Props) {
-  const { id, title, text, color } = data;
+export const generateSocketRoomName = (roomType: string, id: string): string =>
+  `room-${roomType}-${id}`;
+
+export enum roomTypes {
+  note = "note",
+}
+
+type Socket = {
+  lastJsonMessage: Array<
+    Node & {
+      eventSource: string;
+      group: string;
+      type: string;
+    }
+  >;
+};
+
+const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
+  const { id, fiveWTwoHId, title, text, color } = data;
 
   const inputColor = getInputColor(color);
   const tooltipColor = getOverlayInnerStyle(color);
   const pickerColor = convertRgbToHex(color);
 
+  const [jsonData, setJsonData] = useState<Socket["lastJsonMessage"]>([]);
   const { setNodes } = useReactFlow();
 
-  const { sendJsonMessage } = useWebSocket(
-    `${VITE_APP_SOCKET_URL}/socket/5w2h/${id}/`,
-    {
-      share: true,
-      shouldReconnect: () => false,
-    },
-  );
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket<
+    Socket["lastJsonMessage"]
+  >(`${SOCKET_URL}/socket/5w2h/${id}/`, {
+    share: true,
+    shouldReconnect: () => false,
+  });
+
+  useEffect(() => {
+    lastJsonMessage && lastJsonMessage.length && setJsonData(lastJsonMessage);
+  }, [lastJsonMessage]);
+
+  useEffect(() => {
+    console.log(jsonData[0]);
+  }, [jsonData]);
 
   const onCustomNodeChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: "title" | "text" | "color",
   ) => {
     const value = e.target.value;
+    const color = key === "color" && convertHexToRgb(value);
+    const detailsData = { fiveWTwoHId, position: { x: xPos, y: yPos } };
+
+    const changedNodeData = {
+      ...data,
+      details: { data: detailsData },
+      [key]: color || value,
+    };
 
     setNodes((nodes) => {
       return nodes.map((node) => {
@@ -67,6 +101,13 @@ const CustomNode = memo(function CustomNode({ data }: Props) {
 
         return node;
       });
+    });
+
+    sendJsonMessage({
+      group: generateSocketRoomName(roomTypes.note, fiveWTwoHId.toString()),
+      type: roomTypes.note,
+      eventSource: "gemba",
+      data: changedNodeData,
     });
   };
 

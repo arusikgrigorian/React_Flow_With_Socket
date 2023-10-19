@@ -28,10 +28,12 @@ const nodeTypes = { custom: CustomNode };
 
 type Props = {
   nodes: Array<Node>;
-  id: string;
+  IcId: string;
+  userId: number;
 };
 
-export default function Flow({ nodes: initialNodes, id }: Props) {
+export default function Flow({ nodes: initialNodes, IcId, userId }: Props) {
+  // TODO -> user id can be got here from the local storage/context (client)
   const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
   const { fitView, project } = useReactFlow();
@@ -41,8 +43,10 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
   const onCustomNodeAdd = useCallback(() => {
-    const id = getGembaCustomNodeId();
     const position = project({ x: 0, y: 0 });
+    const id = getGembaCustomNodeId();
+    const fiveWTwoHId = Number(IcId);
+    const color = convertHexToRgb(generateRandomColor());
 
     const newCustomNode: Node = {
       id,
@@ -55,13 +59,15 @@ export default function Flow({ nodes: initialNodes, id }: Props) {
         id,
         title: "",
         text: "",
-        color: convertHexToRgb(generateRandomColor()),
+        color,
+        fiveWTwoHId,
+        userId,
       },
     };
 
     setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
-  }, [project, setNodes, onFitView]);
+  }, [project, setNodes, onFitView, IcId, userId]);
 
   const onScreenSizeChange = () => {
     setIsFullScreen(!isFullScreen);

@@ -1,5 +1,5 @@
 import { getUrlWithParams } from "@/utils/getUrlWithParams";
-import { BASE_URL } from "@/constants";
+import { BASE_URL, TOKEN } from "@/constants";
 import { REQUEST_INIT } from "@/services/rest/constants";
 import { Param, Result } from "@/types";
 
@@ -16,12 +16,13 @@ class HttpClient {
 
   constructor(options?: Option) {
     this.init = options?.init || HttpClient.INIT;
-    this._token = "";
+    this._token = `Token ${TOKEN}`;
   }
 
-  set authToken(token: string) {
-    this._token = `Token ${token}`;
-  }
+  // TODO uncomment if cookies are not being used and the token should be set outside
+  // set authToken(token: string) {
+  //   this._token = `Token ${token}`;
+  // }
 
   async _request<T = Result>(endpoint: string, params?: Param): Promise<T> {
     const url = getUrlWithParams(HttpClient.BASE_URL, endpoint, params);
