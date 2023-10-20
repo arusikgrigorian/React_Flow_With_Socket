@@ -1,6 +1,7 @@
 import Gemba from "@/components/Gemba";
 import httpClient from "@/services/rest";
 import { ENDPOINTS } from "@/api/types";
+import { transformNodes } from "@/utils/transformNodes";
 
 type Params = {
   id: string;
@@ -12,30 +13,12 @@ type Props = {
 
 export default async function Home({ params: { id = "47" } }: Props) {
   // TODO -> user id can be got here from the cookies (server)
-  const userId = 1;
+  const user = 1;
   const params = { all: true, five_w_two_h: id };
 
   const { results } = await httpClient.get(ENDPOINTS.gembaNote, params);
 
-  const nodes = results?.map(
-    ({ id, title, text, color, five_w_two_h, details, user }) => {
-      const { position } = details.data;
+  const nodes = transformNodes(results);
 
-      return {
-        id,
-        position,
-        type: "custom",
-        data: {
-          id,
-          title,
-          text,
-          color,
-          fiveWTwoHId: `${five_w_two_h}`,
-          userId: user,
-        },
-      };
-    },
-  );
-
-  return <Gemba nodes={nodes} IcId={id} userId={userId} />;
+  return <Gemba nodes={nodes} IcId={id} user={user} />;
 }

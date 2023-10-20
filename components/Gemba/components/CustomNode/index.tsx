@@ -1,6 +1,6 @@
-import { ChangeEvent, memo, useEffect, useState } from "react";
+import { ChangeEvent, memo, useEffect } from "react";
 import useWebSocket from "react-use-websocket";
-import { Node, NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
+import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
 import { Modal, Tooltip } from "antd";
 
 import {
@@ -18,8 +18,10 @@ import {
 import { t } from "@/utils/translate";
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
+import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
+import { transformNodes } from "@/utils/transformNodes";
 import { SOCKET_URL } from "@/constants";
-import { CustomNodeData } from "@/types";
+import { CustomNodeData, WebSocketResult } from "@/types";
 
 const { confirm } = Modal;
 
@@ -36,16 +38,6 @@ export enum roomTypes {
   note = "note",
 }
 
-type Socket = {
-  lastJsonMessage: Array<
-    Node & {
-      eventSource: string;
-      group: string;
-      type: string;
-    }
-  >;
-};
-
 const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const { id, fiveWTwoHId, title, text, color } = data;
 
@@ -53,23 +45,35 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const tooltipColor = getOverlayInnerStyle(color);
   const pickerColor = convertRgbToHex(color);
 
-  const [jsonData, setJsonData] = useState<Socket["lastJsonMessage"]>([]);
   const { setNodes } = useReactFlow();
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<
-    Socket["lastJsonMessage"]
+    WebSocketResult["jsonMessage"]
   >(`${SOCKET_URL}/socket/5w2h/${id}/`, {
     share: true,
     shouldReconnect: () => false,
   });
 
   useEffect(() => {
-    lastJsonMessage && lastJsonMessage.length && setJsonData(lastJsonMessage);
-  }, [lastJsonMessage]);
+    const lastMessageData = extractJsonMessageData(lastJsonMessage);
+    const lastChangedNodes = transformNodes(lastMessageData);
 
-  useEffect(() => {
-    console.log(jsonData[0]);
-  }, [jsonData]);
+    lastChangedNodes.length &&
+      lastChangedNodes.map((lastChangedNode) => {
+        setNodes((nodes) => {
+          return nodes.map((node) => {
+            if (node.id === lastChangedNode.id) {
+              return {
+                ...node,
+                data: { ...lastChangedNode.data },
+              };
+            }
+
+            return node;
+          });
+        });
+      });
+  }, [lastJsonMessage, setNodes, id]);
 
   const onCustomNodeChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -81,15 +85,20 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
     const changedNodeData = {
       ...data,
-      details: { data: detailsData },
+      details: { data: { ...detailsData } },
       [key]: color || value,
     };
+
+    sendJsonMessage({
+      group: generateSocketRoomName(roomTypes.note, fiveWTwoHId.toString()),
+      type: roomTypes.note,
+      eventSource: "gemba",
+      data: changedNodeData,
+    });
 
     setNodes((nodes) => {
       return nodes.map((node) => {
         if (node.id === id) {
-          const color = key === "color" && convertHexToRgb(value);
-
           return {
             ...node,
             data: {
@@ -101,13 +110,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
         return node;
       });
-    });
-
-    sendJsonMessage({
-      group: generateSocketRoomName(roomTypes.note, fiveWTwoHId.toString()),
-      type: roomTypes.note,
-      eventSource: "gemba",
-      data: changedNodeData,
     });
   };
 

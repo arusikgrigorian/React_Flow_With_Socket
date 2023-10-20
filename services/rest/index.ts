@@ -1,7 +1,7 @@
 import { getUrlWithParams } from "@/utils/getUrlWithParams";
 import { BASE_URL, TOKEN } from "@/constants";
 import { REQUEST_INIT } from "@/services/rest/constants";
-import { Param, Result } from "@/types";
+import { Param, HttpResult } from "@/types";
 
 type Option = {
   init: RequestInit;
@@ -24,7 +24,7 @@ class HttpClient {
   //   this._token = `Token ${token}`;
   // }
 
-  async _request<T = Result>(endpoint: string, params?: Param): Promise<T> {
+  async _request<T = HttpResult>(endpoint: string, params?: Param): Promise<T> {
     const url = getUrlWithParams(HttpClient.BASE_URL, endpoint, params);
     const headers = { ...this.init.headers, Authorization: this._token };
     const init = { ...this.init, headers };
@@ -38,7 +38,7 @@ class HttpClient {
     return response.json();
   }
 
-  get<T = Result>(endpoint: string, params?: Param): Promise<T> {
+  get<T = HttpResult>(endpoint: string, params?: Param): Promise<T> {
     return this._request(endpoint, params);
   }
 }

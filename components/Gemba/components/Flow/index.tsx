@@ -29,11 +29,10 @@ const nodeTypes = { custom: CustomNode };
 type Props = {
   nodes: Array<Node>;
   IcId: string;
-  userId: number;
+  user: number;
 };
 
-export default function Flow({ nodes: initialNodes, IcId, userId }: Props) {
-  // TODO -> user id can be got here from the local storage/context (client)
+export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
   const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
   const { fitView, project } = useReactFlow();
@@ -61,13 +60,13 @@ export default function Flow({ nodes: initialNodes, IcId, userId }: Props) {
         text: "",
         color,
         fiveWTwoHId,
-        userId,
+        userId: user,
       },
     };
 
     setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
-  }, [project, setNodes, onFitView, IcId, userId]);
+  }, [project, setNodes, onFitView, IcId, user]);
 
   const onScreenSizeChange = () => {
     setIsFullScreen(!isFullScreen);
