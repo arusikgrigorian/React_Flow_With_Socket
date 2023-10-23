@@ -5,14 +5,14 @@ import Flow from "@/components/Gemba/components/Flow";
 
 type Props = {
   nodes: Array<Node>;
-  IcId: string;
+  ICId: number;
   user: number;
 };
 
-export default function Gemba({ nodes, IcId, user }: Props) {
+export default function Gemba({ nodes, ICId, user }: Props) {
   return (
     <ReactFlowProvider>
-      <Flow nodes={nodes} IcId={IcId} user={user} />
+      <Flow nodes={nodes} ICId={ICId} user={user} />
     </ReactFlowProvider>
   );
 }

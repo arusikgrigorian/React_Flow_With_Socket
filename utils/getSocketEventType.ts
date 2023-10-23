@@ -3,23 +3,29 @@ import { WebSocketResult } from "@/types";
 export function getSocketEventType(
   jsonMessages: WebSocketResult["jsonMessage"],
 ): string {
-  let event = "";
+  let eventType = "";
 
   jsonMessages &&
     jsonMessages
-      .map(({ eventSource }) => eventSource)
-      .every((eventSource) => {
-        switch (eventSource) {
-          case "gemba":
-            event = "change";
+      .map(({ event }) => event)
+      .every((event) => {
+        switch (event) {
+          case "change":
+            eventType = "change";
             break;
-          case "remove-gemba":
-            event = "deletion";
+          case "deletion":
+            eventType = "deletion";
+            break;
+          case "addition":
+            eventType = "addition";
+            break;
+          case "position":
+            eventType = "position";
             break;
           default:
-            event = "";
+            eventType = "";
         }
       });
 
-  return event;
+  return eventType;
 }

@@ -14,6 +14,7 @@ export function extractJsonMessageData(
           text,
           color,
           details,
+
           five_w_two_h: fiveWTwoHId,
           user: userId,
         };

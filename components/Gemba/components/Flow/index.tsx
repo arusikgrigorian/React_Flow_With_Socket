@@ -1,5 +1,5 @@
-import { useCallback, useContext, useState } from "react";
-// import useWebSocket from "react-use-websocket";
+import { useCallback, useContext, useEffect } from "react";
+import useWebSocket from "react-use-websocket";
 
 import ReactFlow, {
   Background,
@@ -19,8 +19,16 @@ import { FullScreenContext } from "@/context/GembaScreenContext";
 import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
 import { generateRandomColor } from "@/utils/generateRandomColor";
+import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
+import { OPTIONS } from "@/services/socket/constants";
+import { SOCKET_URL } from "@/constants";
+import { WebSocketResult } from "@/types";
+import { ROOM } from "@/api/types";
 
 import "reactflow/dist/style.css";
+import { getSocketEventType } from "@/utils/getSocketEventType";
+import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
+import { transformNodes } from "@/utils/transformNodes";
 
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 const nodeOrigin: NodeOrigin = [0.5, 0.5];
@@ -28,16 +36,54 @@ const nodeTypes = { custom: CustomNode };
 
 type Props = {
   nodes: Array<Node>;
-  IcId: string;
+  ICId: number;
   user: number;
 };
 
-export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
+export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
   const { isFullScreen, setIsFullScreen } = useContext(FullScreenContext);
 
   const { fitView, project } = useReactFlow();
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
+
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket<
+    WebSocketResult["jsonMessage"]
+  >(`${SOCKET_URL}/socket/5w2h/${ICId}/`, OPTIONS);
+
+  useEffect(() => {
+    const lastMessageData = extractJsonMessageData(lastJsonMessage);
+    const lastChangedNodes = transformNodes(lastMessageData);
+    const event = getSocketEventType(lastJsonMessage);
+
+    if (!event) {
+      return;
+    }
+
+    if (event === "addition") {
+      setNodes((nds) =>
+        nds.concat(lastChangedNodes.map((lastChangedNode) => lastChangedNode)),
+      );
+    }
+
+    if (event === "position") {
+      lastChangedNodes.length &&
+        lastChangedNodes.map((lastChangedNode) => {
+          setNodes((nodes) => {
+            return nodes.map((node) => {
+              if (node.id === lastChangedNode.id) {
+                return {
+                  ...node,
+                  ...lastChangedNode,
+                };
+              }
+
+              return node;
+            });
+          });
+        });
+    }
+  }, [setNodes, lastJsonMessage]);
 
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
@@ -49,7 +95,6 @@ export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
   const onCustomNodeAdd = useCallback(() => {
     const position = project({ x: 0, y: 0 });
     const id = getGembaCustomNodeId();
-    const fiveWTwoHId = Number(IcId);
     const color = convertHexToRgb(generateRandomColor());
 
     const newCustomNode: Node = {
@@ -64,14 +109,51 @@ export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
         title: "",
         text: "",
         color,
-        fiveWTwoHId,
+        fiveWTwoHId: ICId,
         userId: user,
       },
     };
 
+    const detailsData = { fiveWTwoHId: ICId, position };
+    const addedNodeData = {
+      ...newCustomNode.data,
+      event: "addition",
+      details: { data: { ...detailsData } },
+    };
+
     setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
-  }, [project, setNodes, onFitView, IcId, user]);
+
+    sendJsonMessage({
+      group: generateSocketRoomName(ROOM.note, ICId),
+      type: ROOM.note,
+      eventSource: "gemba",
+      event: "addition",
+      data: { ...addedNodeData },
+    });
+  }, [project, setNodes, onFitView, ICId, user, sendJsonMessage]);
+
+  const onNodeDragStop = useCallback(
+    (_: any, { data, position }: Node) => {
+      const detailsData = { fiveWTwoHId: ICId, position };
+
+      const draggedNodeData = {
+        ...data,
+        position,
+        userId: data.user,
+        details: { data: { ...detailsData } },
+      };
+
+      sendJsonMessage({
+        group: generateSocketRoomName(ROOM.note, ICId),
+        type: ROOM.note,
+        eventSource: "gemba",
+        event: "position",
+        data: { ...draggedNodeData },
+      });
+    },
+    [ICId, sendJsonMessage],
+  );
 
   return (
     <main className={"max-h-screen"}>
@@ -84,6 +166,8 @@ export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
           nodes={nodes}
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
+          onNodeDragStop={onNodeDragStop}
+          nodeDragThreshold={1}
           fitView={true}
           zoomOnScroll={true}
           zoomOnPinch={true}

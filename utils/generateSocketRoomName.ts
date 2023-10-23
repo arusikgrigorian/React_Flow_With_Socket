@@ -1,3 +1,3 @@
-export function generateSocketRoomName(type: string, id: string): string {
+export function generateSocketRoomName(type: string, id: number): string {
   return `room-${type}-${id}`;
 }

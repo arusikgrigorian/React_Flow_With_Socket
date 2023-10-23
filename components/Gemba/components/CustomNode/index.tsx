@@ -1,6 +1,6 @@
-import { ChangeEvent, memo, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, memo, useCallback, useEffect } from "react";
 import useWebSocket from "react-use-websocket";
-import { NodeResizeControl, NodeToolbar, useReactFlow, Node } from "reactflow";
+import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
 import { Modal, Tooltip } from "antd";
 
 import {
@@ -20,12 +20,12 @@ import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
 import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
 import { transformNodes } from "@/utils/transformNodes";
+import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
+import { getSocketEventType } from "@/utils/getSocketEventType";
 import { SOCKET_URL } from "@/constants";
+import { OPTIONS } from "@/services/socket/constants";
 import { CustomNodeData, WebSocketResult } from "@/types";
 import { ROOM } from "@/api/types";
-import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
-import { OPTIONS } from "@/services/socket/constants";
-import { getSocketEventType } from "@/utils/getSocketEventType";
 
 const { confirm } = Modal;
 
@@ -41,8 +41,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const inputColor = getInputColor(color);
   const tooltipColor = getOverlayInnerStyle(color);
   const pickerColor = convertRgbToHex(color);
-
-  const [lastChangedNodes, setLastChangedNodes] = useState<Array<Node>>([]);
 
   const { setNodes, deleteElements } = useReactFlow();
 
@@ -63,15 +61,9 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
     if (event === "change") {
       const lastMessageData = extractJsonMessageData(lastJsonMessage);
-      const nodes = transformNodes(lastMessageData);
+      const lastChangedNodes = transformNodes(lastMessageData);
 
-      nodes.length && setLastChangedNodes(nodes);
-    }
-  }, [lastJsonMessage, setNodes, id, deleteElements]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      lastChangedNodes &&
+      lastChangedNodes.length &&
         lastChangedNodes.map((lastChangedNode) => {
           setNodes((nodes) => {
             return nodes.map((node) => {
@@ -85,9 +77,9 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
               return node;
             });
           });
-        }, 10000);
-    });
-  }, [id, lastChangedNodes, setNodes]);
+        });
+    }
+  }, [lastJsonMessage, setNodes, id, deleteElements]);
 
   const onCustomNodeChange = useCallback(
     (
@@ -105,10 +97,11 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
       };
 
       sendJsonMessage({
-        group: generateSocketRoomName(ROOM.note, fiveWTwoHId.toString()),
+        group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
         type: ROOM.note,
         eventSource: "gemba",
-        data: changedNodeData,
+        event: "change",
+        data: { ...changedNodeData },
       });
 
       setNodes((nodes) => {
@@ -141,9 +134,10 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
       onOk: () => {
         deleteElements({ nodes: [{ id }] });
         sendJsonMessage({
-          group: generateSocketRoomName(ROOM.note, fiveWTwoHId.toString()),
+          group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
           type: ROOM.note,
           eventSource: "remove-gemba",
+          event: "deletion",
           data: {
             id,
           },

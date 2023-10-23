@@ -17,7 +17,7 @@ export function transformNodes(
             title,
             text,
             color,
-            fiveWTwoHId: `${five_w_two_h}`,
+            fiveWTwoHId: five_w_two_h,
             user,
           },
         };
