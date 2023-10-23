@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 // import useWebSocket from "react-use-websocket";
 
 import ReactFlow, {
@@ -41,6 +41,11 @@ export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
 
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
+  const onScreenSizeChange = useCallback(() => {
+    setIsFullScreen(!isFullScreen);
+    setTimeout(onFitView, 400);
+  }, [isFullScreen, setIsFullScreen, onFitView]);
+
   const onCustomNodeAdd = useCallback(() => {
     const position = project({ x: 0, y: 0 });
     const id = getGembaCustomNodeId();
@@ -67,11 +72,6 @@ export default function Flow({ nodes: initialNodes, IcId, user }: Props) {
     setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
   }, [project, setNodes, onFitView, IcId, user]);
-
-  const onScreenSizeChange = () => {
-    setIsFullScreen(!isFullScreen);
-    setTimeout(onFitView, 400);
-  };
 
   return (
     <main className={"max-h-screen"}>

@@ -7,7 +7,7 @@
 
 # files
 /constants.ts
-/services/rest/constants.ts
+/services/**/constants.ts
 
 # testing
 /coverage

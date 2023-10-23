@@ -1,6 +1,6 @@
-import { ChangeEvent, memo, useEffect } from "react";
+import { ChangeEvent, memo, useCallback, useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
-import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
+import { NodeResizeControl, NodeToolbar, useReactFlow, Node } from "reactflow";
 import { Modal, Tooltip } from "antd";
 
 import {
@@ -22,6 +22,10 @@ import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
 import { transformNodes } from "@/utils/transformNodes";
 import { SOCKET_URL } from "@/constants";
 import { CustomNodeData, WebSocketResult } from "@/types";
+import { ROOM } from "@/api/types";
+import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
+import { OPTIONS } from "@/services/socket/constants";
+import { getSocketEventType } from "@/utils/getSocketEventType";
 
 const { confirm } = Modal;
 
@@ -31,13 +35,6 @@ type Props = {
   yPos: number;
 };
 
-export const generateSocketRoomName = (roomType: string, id: string): string =>
-  `room-${roomType}-${id}`;
-
-export enum roomTypes {
-  note = "note",
-}
-
 const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const { id, fiveWTwoHId, title, text, color } = data;
 
@@ -45,75 +42,95 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const tooltipColor = getOverlayInnerStyle(color);
   const pickerColor = convertRgbToHex(color);
 
-  const { setNodes } = useReactFlow();
+  const [lastChangedNodes, setLastChangedNodes] = useState<Array<Node>>([]);
+
+  const { setNodes, deleteElements } = useReactFlow();
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<
     WebSocketResult["jsonMessage"]
-  >(`${SOCKET_URL}/socket/5w2h/${id}/`, {
-    share: true,
-    shouldReconnect: () => false,
-  });
+  >(`${SOCKET_URL}/socket/5w2h/${id}/`, OPTIONS);
 
   useEffect(() => {
-    const lastMessageData = extractJsonMessageData(lastJsonMessage);
-    const lastChangedNodes = transformNodes(lastMessageData);
+    const event = getSocketEventType(lastJsonMessage);
 
-    lastChangedNodes.length &&
-      lastChangedNodes.map((lastChangedNode) => {
-        setNodes((nodes) => {
-          return nodes.map((node) => {
-            if (node.id === lastChangedNode.id) {
-              return {
-                ...node,
-                data: { ...lastChangedNode.data },
-              };
-            }
+    if (!event) {
+      return;
+    }
 
-            return node;
+    if (event === "deletion") {
+      deleteElements({ nodes: [{ id }] });
+    }
+
+    if (event === "change") {
+      const lastMessageData = extractJsonMessageData(lastJsonMessage);
+      const nodes = transformNodes(lastMessageData);
+
+      nodes.length && setLastChangedNodes(nodes);
+    }
+  }, [lastJsonMessage, setNodes, id, deleteElements]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      lastChangedNodes &&
+        lastChangedNodes.map((lastChangedNode) => {
+          setNodes((nodes) => {
+            return nodes.map((node) => {
+              if (node.id === lastChangedNode.id) {
+                return {
+                  ...node,
+                  data: { ...lastChangedNode.data },
+                };
+              }
+
+              return node;
+            });
           });
+        }, 10000);
+    });
+  }, [id, lastChangedNodes, setNodes]);
+
+  const onCustomNodeChange = useCallback(
+    (
+      e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      key: "title" | "text" | "color",
+    ) => {
+      const value = e.target.value;
+      const color = key === "color" && convertHexToRgb(value);
+      const detailsData = { fiveWTwoHId, position: { x: xPos, y: yPos } };
+
+      const changedNodeData = {
+        ...data,
+        details: { data: { ...detailsData } },
+        [key]: color || value,
+      };
+
+      sendJsonMessage({
+        group: generateSocketRoomName(ROOM.note, fiveWTwoHId.toString()),
+        type: ROOM.note,
+        eventSource: "gemba",
+        data: changedNodeData,
+      });
+
+      setNodes((nodes) => {
+        return nodes.map((node) => {
+          if (node.id === id) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                [key]: color || value,
+              },
+            };
+          }
+
+          return node;
         });
       });
-  }, [lastJsonMessage, setNodes, id]);
+    },
+    [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendJsonMessage],
+  );
 
-  const onCustomNodeChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    key: "title" | "text" | "color",
-  ) => {
-    const value = e.target.value;
-    const color = key === "color" && convertHexToRgb(value);
-    const detailsData = { fiveWTwoHId, position: { x: xPos, y: yPos } };
-
-    const changedNodeData = {
-      ...data,
-      details: { data: { ...detailsData } },
-      [key]: color || value,
-    };
-
-    sendJsonMessage({
-      group: generateSocketRoomName(roomTypes.note, fiveWTwoHId.toString()),
-      type: roomTypes.note,
-      eventSource: "gemba",
-      data: changedNodeData,
-    });
-
-    setNodes((nodes) => {
-      return nodes.map((node) => {
-        if (node.id === id) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              [key]: color || value,
-            },
-          };
-        }
-
-        return node;
-      });
-    });
-  };
-
-  const onCustomNodeDelete = () => {
+  const onCustomNodeDelete = useCallback(() => {
     confirm({
       centered: true,
       title: t("Are you sure delete this note?"),
@@ -121,21 +138,19 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
       okText: t("Delete"),
       okType: "danger",
       cancelText: t("Cancel"),
-      onOk() {
-        setNodes((nodes) => {
-          return nodes.map((node) => {
-            if (node.id === id) {
-              return {
-                ...node,
-                hidden: true,
-              };
-            }
-            return node;
-          });
+      onOk: () => {
+        deleteElements({ nodes: [{ id }] });
+        sendJsonMessage({
+          group: generateSocketRoomName(ROOM.note, fiveWTwoHId.toString()),
+          type: ROOM.note,
+          eventSource: "remove-gemba",
+          data: {
+            id,
+          },
         });
       },
     });
-  };
+  }, [id, fiveWTwoHId, deleteElements, sendJsonMessage]);
 
   return (
     <>
