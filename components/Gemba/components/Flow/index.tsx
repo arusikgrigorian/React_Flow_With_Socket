@@ -47,6 +47,8 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
 
+  const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
+
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<
     WebSocketResult["jsonMessage"]
   >(`${SOCKET_URL}/socket/5w2h/${ICId}/`, OPTIONS);
@@ -61,9 +63,18 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
     }
 
     if (event === "addition") {
-      setNodes((nds) =>
-        nds.concat(lastChangedNodes.map((lastChangedNode) => lastChangedNode)),
-      );
+      lastChangedNodes.length &&
+        lastChangedNodes.map((lastChangedNode) => {
+          setNodes((nodes) => {
+            let isNodeAlreadyAdded = false;
+
+            nodes.forEach((node) => {
+              isNodeAlreadyAdded = node.id === lastChangedNode.id;
+            });
+
+            return isNodeAlreadyAdded ? nodes : nodes.concat(lastChangedNode);
+          });
+        });
     }
 
     if (event === "position") {
@@ -84,8 +95,6 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
         });
     }
   }, [setNodes, lastJsonMessage]);
-
-  const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
   const onScreenSizeChange = useCallback(() => {
     setIsFullScreen(!isFullScreen);
@@ -133,7 +142,7 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
     });
   }, [project, setNodes, onFitView, ICId, user, sendJsonMessage]);
 
-  const onNodeDragStop = useCallback(
+  const onCustomNodeDragStop = useCallback(
     (_: any, { data, position }: Node) => {
       const detailsData = { fiveWTwoHId: ICId, position };
 
@@ -166,8 +175,7 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
           nodes={nodes}
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
-          onNodeDragStop={onNodeDragStop}
-          nodeDragThreshold={1}
+          onNodeDragStop={onCustomNodeDragStop}
           fitView={true}
           zoomOnScroll={true}
           zoomOnPinch={true}

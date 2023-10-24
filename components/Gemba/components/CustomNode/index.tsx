@@ -42,7 +42,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const tooltipColor = getOverlayInnerStyle(color);
   const pickerColor = convertRgbToHex(color);
 
-  const { setNodes, deleteElements } = useReactFlow();
+  const { setNodes, deleteElements, fitView } = useReactFlow();
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<
     WebSocketResult["jsonMessage"]
@@ -88,21 +88,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
     ) => {
       const value = e.target.value;
       const color = key === "color" && convertHexToRgb(value);
-      const detailsData = { fiveWTwoHId, position: { x: xPos, y: yPos } };
-
-      const changedNodeData = {
-        ...data,
-        details: { data: { ...detailsData } },
-        [key]: color || value,
-      };
-
-      sendJsonMessage({
-        group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
-        type: ROOM.note,
-        eventSource: "gemba",
-        event: "change",
-        data: { ...changedNodeData },
-      });
 
       setNodes((nodes) => {
         return nodes.map((node) => {
@@ -119,9 +104,26 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
           return node;
         });
       });
+
+      const detailsData = { fiveWTwoHId, position: { x: xPos, y: yPos } };
+      const changedNodeData = {
+        ...data,
+        details: { data: { ...detailsData } },
+        [key]: color || value,
+      };
+
+      sendJsonMessage({
+        group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
+        type: ROOM.note,
+        eventSource: "gemba",
+        event: "change",
+        data: { ...changedNodeData },
+      });
     },
     [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendJsonMessage],
   );
+
+  const onCustomNodeBlur = useCallback(() => {}, []);
 
   const onCustomNodeDelete = useCallback(() => {
     confirm({
@@ -133,6 +135,8 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
       cancelText: t("Cancel"),
       onOk: () => {
         deleteElements({ nodes: [{ id }] });
+        setTimeout(() => fitView({ duration: 400 }), 100);
+
         sendJsonMessage({
           group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
           type: ROOM.note,
@@ -144,7 +148,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         });
       },
     });
-  }, [id, fiveWTwoHId, deleteElements, sendJsonMessage]);
+  }, [id, fiveWTwoHId, deleteElements, fitView, sendJsonMessage]);
 
   return (
     <>
@@ -194,6 +198,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
               placeholder={""}
               value={pickerColor}
               onChange={(e) => onCustomNodeChange(e, "color")}
+              onBlur={onCustomNodeBlur}
             />
           </div>
           <div className={"w-full"}>
@@ -209,6 +214,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
                 placeholder={"Title"}
                 value={title}
                 onChange={(e) => onCustomNodeChange(e, "title")}
+                onBlur={onCustomNodeBlur}
               />
             </Tooltip>
           </div>
@@ -219,6 +225,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
               placeholder={"Type here"}
               value={text}
               onChange={(e) => onCustomNodeChange(e, "text")}
+              onBlur={onCustomNodeBlur}
             />
           </div>
         </form>
