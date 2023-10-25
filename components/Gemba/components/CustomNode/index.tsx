@@ -123,8 +123,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
     [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendJsonMessage],
   );
 
-  const onCustomNodeBlur = useCallback(() => {}, []);
-
   const onCustomNodeDelete = useCallback(() => {
     confirm({
       centered: true,
@@ -198,7 +196,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
               placeholder={""}
               value={pickerColor}
               onChange={(e) => onCustomNodeChange(e, "color")}
-              onBlur={onCustomNodeBlur}
             />
           </div>
           <div className={"w-full"}>
@@ -214,7 +211,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
                 placeholder={"Title"}
                 value={title}
                 onChange={(e) => onCustomNodeChange(e, "title")}
-                onBlur={onCustomNodeBlur}
               />
             </Tooltip>
           </div>
@@ -225,7 +221,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
               placeholder={"Type here"}
               value={text}
               onChange={(e) => onCustomNodeChange(e, "text")}
-              onBlur={onCustomNodeBlur}
             />
           </div>
         </form>
