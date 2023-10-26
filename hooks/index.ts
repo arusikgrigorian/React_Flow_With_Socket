@@ -10,6 +10,7 @@ import { OPTIONS } from "@/hooks/constants";
 import { SOCKET_URL } from "@/constants";
 
 import { SocketResult } from "@/types";
+import { Event } from "@/api/types";
 
 type Param = {
   id: string | number;
@@ -25,19 +26,22 @@ export function useSocket(params: Param, nodeId?: string) {
   useEffect(() => {
     const lastMessageData = extractJsonMessageData(lastJsonMessage);
     const lastChangedNodes = transformNodes(lastMessageData);
+
     const event = getSocketEventType(lastJsonMessage);
 
     if (!event) {
       return;
     }
 
-    if (event === "deletion") {
-      console.log("deletion", "---------", nodeId);
-      deleteElements({ nodes: [{ id: nodeId || "" }] });
+    if (event === Event.deletion) {
+      const nodes = lastChangedNodes.map(({ id }) => {
+        return { id };
+      });
+
+      deleteElements({ nodes });
     }
 
-    if (event === "change") {
-      console.log("change of inputs");
+    if (event === Event.input) {
       lastChangedNodes.length &&
         lastChangedNodes.map((lastChangedNode) => {
           setNodes((nodes) => {
@@ -55,8 +59,7 @@ export function useSocket(params: Param, nodeId?: string) {
         });
     }
 
-    if (event === "addition") {
-      console.log("addition");
+    if (event === Event.addition) {
       lastChangedNodes.length &&
         lastChangedNodes.map((lastChangedNode) => {
           setNodes((nodes) => {
@@ -71,8 +74,7 @@ export function useSocket(params: Param, nodeId?: string) {
         });
     }
 
-    if (event === "position") {
-      console.log("position change");
+    if (event === Event.position) {
       lastChangedNodes.length &&
         lastChangedNodes.map((lastChangedNode) => {
           setNodes((nodes) => {
@@ -91,5 +93,5 @@ export function useSocket(params: Param, nodeId?: string) {
     }
   }, [lastJsonMessage, setNodes, nodeId, deleteElements]);
 
-  return [sendJsonMessage];
+  return { sendJsonMessage };
 }

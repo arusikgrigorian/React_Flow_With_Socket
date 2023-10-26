@@ -1,7 +1,7 @@
-import { CustomNode, WebSocketResult } from "@/types";
+import { CustomNode, SocketResult } from "@/types";
 
 export function extractJsonMessageData(
-  jsonMessages: WebSocketResult["jsonMessage"],
+  jsonMessages: SocketResult["jsonMessage"],
 ): Array<Omit<CustomNode, "type" | "position">> {
   return (
     (jsonMessages &&
@@ -14,7 +14,6 @@ export function extractJsonMessageData(
           text,
           color,
           details,
-
           five_w_two_h: fiveWTwoHId,
           user: userId,
         };

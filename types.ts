@@ -36,7 +36,7 @@ export type ExtendedCustomNodeData = {
 
 export type ExtendedCustomNode = {
   eventSource: string;
-  event: string;
+  event: keyof typeof Event;
   group: string;
   type: string;
   data: ExtendedCustomNodeData;

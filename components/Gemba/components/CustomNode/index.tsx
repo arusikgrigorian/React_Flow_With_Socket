@@ -41,7 +41,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
   const { setNodes, deleteElements, fitView } = useReactFlow();
 
-  const [sendJsonMessage] = useSocket({ id }, id);
+  const { sendJsonMessage } = useSocket({ id }, id);
 
   const sendMessage = useCallback(
     (params: JsonMessageParam, data: Node["data"]) =>
@@ -76,7 +76,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
       const params = {
         groupId: fiveWTwoHId,
         eventSource: EventSource.gemba,
-        event: Event.change,
+        event: Event.input,
       };
 
       const changedNodeData = {

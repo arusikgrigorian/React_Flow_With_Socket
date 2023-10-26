@@ -6,7 +6,7 @@ export function transformNodes(
 ): Array<Node> {
   return nodes && nodes.length
     ? nodes.map(({ id, title, text, color, five_w_two_h, details, user }) => {
-        const { position } = details.data;
+        const { position } = details?.data || {};
 
         return {
           id,

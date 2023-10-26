@@ -1,20 +1,21 @@
 import { SocketResult } from "@/types";
+import { Event } from "@/api/types";
 
-function getEventType(event: string): string {
+function getEventType(event: keyof typeof Event): string {
   let eventType;
 
   switch (event) {
-    case "change":
-      eventType = "change";
+    case Event.input:
+      eventType = Event.input;
       break;
-    case "deletion":
-      eventType = "deletion";
+    case Event.deletion:
+      eventType = Event.deletion;
       break;
-    case "addition":
-      eventType = "addition";
+    case Event.addition:
+      eventType = Event.addition;
       break;
-    case "position":
-      eventType = "position";
+    case Event.position:
+      eventType = Event.position;
       break;
     default:
       eventType = "";

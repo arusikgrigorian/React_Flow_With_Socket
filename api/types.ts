@@ -8,7 +8,7 @@ export enum EventSource {
 }
 
 export enum Event {
-  change = "change",
+  input = "input",
   position = "position",
   addition = "addition",
   deletion = "deletion",

@@ -45,7 +45,7 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
 
-  const [sendJsonMessage] = useSocket({ id: ICId });
+  const { sendJsonMessage } = useSocket({ id: ICId });
 
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
