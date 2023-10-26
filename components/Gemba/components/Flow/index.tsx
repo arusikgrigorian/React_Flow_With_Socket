@@ -1,5 +1,4 @@
-import { useCallback, useContext, useEffect } from "react";
-import useWebSocket from "react-use-websocket";
+import { useCallback, useContext } from "react";
 
 import ReactFlow, {
   Background,
@@ -15,20 +14,19 @@ import ReactFlow, {
 
 import CustomNode from "../CustomNode";
 import FlowPanel from "../FlowPanel";
+
 import { FullScreenContext } from "@/context/GembaScreenContext";
+import { useSocket } from "@/hooks";
+import { send } from "@/services/socket";
+
 import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
 import { generateRandomColor } from "@/utils/generateRandomColor";
-import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
-import { OPTIONS } from "@/services/socket/constants";
-import { SOCKET_URL } from "@/constants";
-import { WebSocketResult } from "@/types";
-import { ROOM } from "@/api/types";
+
+import { JsonMessageParam } from "@/types";
+import { EventSource, Event } from "@/api/types";
 
 import "reactflow/dist/style.css";
-import { getSocketEventType } from "@/utils/getSocketEventType";
-import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
-import { transformNodes } from "@/utils/transformNodes";
 
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 const nodeOrigin: NodeOrigin = [0.5, 0.5];
@@ -47,54 +45,15 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
 
+  const [sendJsonMessage] = useSocket({ id: ICId });
+
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket<
-    WebSocketResult["jsonMessage"]
-  >(`${SOCKET_URL}/socket/5w2h/${ICId}/`, OPTIONS);
-
-  useEffect(() => {
-    const lastMessageData = extractJsonMessageData(lastJsonMessage);
-    const lastChangedNodes = transformNodes(lastMessageData);
-    const event = getSocketEventType(lastJsonMessage);
-
-    if (!event) {
-      return;
-    }
-
-    if (event === "addition") {
-      lastChangedNodes.length &&
-        lastChangedNodes.map((lastChangedNode) => {
-          setNodes((nodes) => {
-            let isNodeAlreadyAdded = false;
-
-            nodes.forEach((node) => {
-              isNodeAlreadyAdded = node.id === lastChangedNode.id;
-            });
-
-            return isNodeAlreadyAdded ? nodes : nodes.concat(lastChangedNode);
-          });
-        });
-    }
-
-    if (event === "position") {
-      lastChangedNodes.length &&
-        lastChangedNodes.map((lastChangedNode) => {
-          setNodes((nodes) => {
-            return nodes.map((node) => {
-              if (node.id === lastChangedNode.id) {
-                return {
-                  ...node,
-                  ...lastChangedNode,
-                };
-              }
-
-              return node;
-            });
-          });
-        });
-    }
-  }, [setNodes, lastJsonMessage]);
+  const sendMessage = useCallback(
+    (params: JsonMessageParam, data: Node["data"]) =>
+      send(sendJsonMessage, params, data),
+    [sendJsonMessage],
+  );
 
   const onScreenSizeChange = useCallback(() => {
     setIsFullScreen(!isFullScreen);
@@ -123,45 +82,41 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
       },
     };
 
-    const detailsData = { fiveWTwoHId: ICId, position };
-    const addedNodeData = {
-      ...newCustomNode.data,
-      event: "addition",
-      details: { data: { ...detailsData } },
-    };
-
     setNodes((nds) => nds.concat(newCustomNode));
     setTimeout(onFitView, 100);
 
-    sendJsonMessage({
-      group: generateSocketRoomName(ROOM.note, ICId),
-      type: ROOM.note,
-      eventSource: "gemba",
-      event: "addition",
-      data: { ...addedNodeData },
-    });
-  }, [project, setNodes, onFitView, ICId, user, sendJsonMessage]);
+    const params = {
+      groupId: ICId,
+      eventSource: EventSource.gemba,
+      event: Event.addition,
+    };
+
+    const addedNodeData = {
+      ...newCustomNode.data,
+      details: { data: { fiveWTwoHId: ICId, position } },
+    };
+
+    sendMessage(params, addedNodeData);
+  }, [project, setNodes, onFitView, ICId, user, sendMessage]);
 
   const onCustomNodeDragStop = useCallback(
     (_: any, { data, position }: Node) => {
-      const detailsData = { fiveWTwoHId: ICId, position };
+      const params = {
+        groupId: ICId,
+        eventSource: EventSource.gemba,
+        event: Event.position,
+      };
 
       const draggedNodeData = {
         ...data,
         position,
         userId: data.user,
-        details: { data: { ...detailsData } },
+        details: { data: { fiveWTwoHId: ICId, position } },
       };
 
-      sendJsonMessage({
-        group: generateSocketRoomName(ROOM.note, ICId),
-        type: ROOM.note,
-        eventSource: "gemba",
-        event: "position",
-        data: { ...draggedNodeData },
-      });
+      sendMessage(params, draggedNodeData);
     },
-    [ICId, sendJsonMessage],
+    [ICId, sendMessage],
   );
 
   return (

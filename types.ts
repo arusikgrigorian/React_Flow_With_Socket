@@ -1,6 +1,7 @@
 import { XYPosition } from "reactflow";
+import { EventSource, Event } from "@/api/types";
 
-export type WebSocketResult = {
+export type SocketResult = {
   jsonMessage: Array<ExtendedCustomNode>;
 };
 
@@ -9,6 +10,12 @@ export type HttpResult = {
   next: null;
   previous: null;
   results: Array<CustomNode>;
+};
+
+export type JsonMessageParam = {
+  groupId: number;
+  eventSource: keyof typeof EventSource;
+  event: keyof typeof Event;
 };
 
 export type Param = {

@@ -1,4 +1,4 @@
-import { WebSocketResult } from "@/types";
+import { SocketResult } from "@/types";
 
 function getEventType(event: string): string {
   let eventType;
@@ -24,7 +24,7 @@ function getEventType(event: string): string {
 }
 
 export function getSocketEventType(
-  jsonMessages: WebSocketResult["jsonMessage"],
+  jsonMessages: SocketResult["jsonMessage"],
 ): string {
   const isEventTheSame =
     jsonMessages &&

@@ -1,6 +1,5 @@
-import { ChangeEvent, memo, useCallback, useEffect } from "react";
-import useWebSocket from "react-use-websocket";
-import { NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
+import { ChangeEvent, memo, useCallback } from "react";
+import { Node, NodeResizeControl, NodeToolbar, useReactFlow } from "reactflow";
 import { Modal, Tooltip } from "antd";
 
 import {
@@ -10,6 +9,9 @@ import {
   FullscreenOutlined,
 } from "@ant-design/icons";
 
+import { useSocket } from "@/hooks";
+import { send } from "@/services/socket";
+
 import {
   getInputColor,
   getOverlayInnerStyle,
@@ -18,14 +20,9 @@ import {
 import { t } from "@/utils/translate";
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
-import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
-import { transformNodes } from "@/utils/transformNodes";
-import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
-import { getSocketEventType } from "@/utils/getSocketEventType";
-import { SOCKET_URL } from "@/constants";
-import { OPTIONS } from "@/services/socket/constants";
-import { CustomNodeData, WebSocketResult } from "@/types";
-import { ROOM } from "@/api/types";
+
+import { CustomNodeData, JsonMessageParam } from "@/types";
+import { Event, EventSource } from "@/api/types";
 
 const { confirm } = Modal;
 
@@ -44,42 +41,13 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
   const { setNodes, deleteElements, fitView } = useReactFlow();
 
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket<
-    WebSocketResult["jsonMessage"]
-  >(`${SOCKET_URL}/socket/5w2h/${id}/`, OPTIONS);
+  const [sendJsonMessage] = useSocket({ id }, id);
 
-  useEffect(() => {
-    const event = getSocketEventType(lastJsonMessage);
-
-    if (!event) {
-      return;
-    }
-
-    if (event === "deletion") {
-      deleteElements({ nodes: [{ id }] });
-    }
-
-    if (event === "change") {
-      const lastMessageData = extractJsonMessageData(lastJsonMessage);
-      const lastChangedNodes = transformNodes(lastMessageData);
-
-      lastChangedNodes.length &&
-        lastChangedNodes.map((lastChangedNode) => {
-          setNodes((nodes) => {
-            return nodes.map((node) => {
-              if (node.id === lastChangedNode.id) {
-                return {
-                  ...node,
-                  data: { ...lastChangedNode.data },
-                };
-              }
-
-              return node;
-            });
-          });
-        });
-    }
-  }, [lastJsonMessage, setNodes, id, deleteElements]);
+  const sendMessage = useCallback(
+    (params: JsonMessageParam, data: Node["data"]) =>
+      send(sendJsonMessage, params, data),
+    [sendJsonMessage],
+  );
 
   const onCustomNodeChange = useCallback(
     (
@@ -105,22 +73,21 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         });
       });
 
-      const detailsData = { fiveWTwoHId, position: { x: xPos, y: yPos } };
+      const params = {
+        groupId: fiveWTwoHId,
+        eventSource: EventSource.gemba,
+        event: Event.change,
+      };
+
       const changedNodeData = {
         ...data,
-        details: { data: { ...detailsData } },
+        details: { data: { fiveWTwoHId, position: { x: xPos, y: yPos } } },
         [key]: color || value,
       };
 
-      sendJsonMessage({
-        group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
-        type: ROOM.note,
-        eventSource: "gemba",
-        event: "change",
-        data: { ...changedNodeData },
-      });
+      sendMessage(params, changedNodeData);
     },
-    [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendJsonMessage],
+    [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendMessage],
   );
 
   const onCustomNodeDelete = useCallback(() => {
@@ -135,18 +102,16 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         deleteElements({ nodes: [{ id }] });
         setTimeout(() => fitView({ duration: 400 }), 100);
 
-        sendJsonMessage({
-          group: generateSocketRoomName(ROOM.note, fiveWTwoHId),
-          type: ROOM.note,
-          eventSource: "remove-gemba",
-          event: "deletion",
-          data: {
-            id,
-          },
-        });
+        const params = {
+          groupId: fiveWTwoHId,
+          eventSource: EventSource["remove-gemba"],
+          event: Event.deletion,
+        };
+
+        sendMessage(params, { id });
       },
     });
-  }, [id, fiveWTwoHId, deleteElements, fitView, sendJsonMessage]);
+  }, [id, fiveWTwoHId, deleteElements, fitView, sendMessage]);
 
   return (
     <>

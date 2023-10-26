@@ -8,6 +8,7 @@
 # files
 /constants.ts
 /services/**/constants.ts
+/hooks/constants.ts
 
 # testing
 /coverage
