@@ -17,14 +17,14 @@ import FlowPanel from "../FlowPanel";
 
 import { FullScreenContext } from "@/context/GembaScreenContext";
 import { useSocket } from "@/hooks";
-import { send } from "@/services/socket";
 
 import { getGembaCustomNodeId } from "@/utils/getGembaCustomNodeId";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
 import { generateRandomColor } from "@/utils/generateRandomColor";
+import { send } from "@/utils/send";
 
-import { JsonMessageParam } from "@/types";
-import { EventSource, Event } from "@/api/types";
+import { JsonMessageParam } from "@/types/global";
+import { Event, EventSource } from "@/types/api";
 
 import "reactflow/dist/style.css";
 

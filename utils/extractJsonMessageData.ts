@@ -1,4 +1,4 @@
-import { CustomNode, SocketResult } from "@/types";
+import { CustomNode, SocketResult } from "@/types/global";
 
 export function extractJsonMessageData(
   jsonMessages: SocketResult["jsonMessage"],

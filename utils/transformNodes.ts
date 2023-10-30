@@ -1,5 +1,5 @@
 import { Node } from "reactflow";
-import { CustomNode } from "@/types";
+import { CustomNode } from "@/types/global";
 
 export function transformNodes(
   nodes: Array<CustomNode | Omit<CustomNode, "type" | "position">>,

@@ -1,5 +1,5 @@
-import { SocketResult } from "@/types";
-import { Event } from "@/api/types";
+import { SocketResult } from "@/types/global";
+import { Event } from "@/types/api";
 
 function getEventType(event: keyof typeof Event): string {
   let eventType;

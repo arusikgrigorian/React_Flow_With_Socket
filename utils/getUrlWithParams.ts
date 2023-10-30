@@ -1,4 +1,4 @@
-import { Param } from "@/types";
+import { Param } from "@/types/global";
 
 export function getUrlWithParams(
   baseUrl: string,

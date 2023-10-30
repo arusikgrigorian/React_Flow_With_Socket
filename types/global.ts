@@ -1,5 +1,5 @@
 import { XYPosition } from "reactflow";
-import { EventSource, Event } from "@/api/types";
+import { Event, EventSource } from "@/types/api";
 
 export type SocketResult = {
   jsonMessage: Array<ExtendedCustomNode>;

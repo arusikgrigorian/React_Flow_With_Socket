@@ -6,11 +6,11 @@ import { getSocketEventType } from "@/utils/getSocketEventType";
 import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
 import { transformNodes } from "@/utils/transformNodes";
 
-import { OPTIONS } from "@/hooks/constants";
 import { SOCKET_URL } from "@/constants";
+import { OPTIONS } from "@/hooks/constants";
 
-import { SocketResult } from "@/types";
-import { Event } from "@/api/types";
+import { SocketResult } from "@/types/global";
+import { Event } from "@/types/api";
 
 type Param = {
   id: string | number;

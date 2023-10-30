@@ -10,19 +10,19 @@ import {
 } from "@ant-design/icons";
 
 import { useSocket } from "@/hooks";
-import { send } from "@/services/socket";
 
 import {
   getInputColor,
   getOverlayInnerStyle,
 } from "@/utils/getCustomNodeStyles";
 
-import { t } from "@/utils/translate";
 import { convertRgbToHex } from "@/utils/convertRgbToHex";
 import { convertHexToRgb } from "@/utils/convertHexToRgb";
+import { t } from "@/utils/translate";
+import { send } from "@/utils/send";
 
-import { CustomNodeData, JsonMessageParam } from "@/types";
-import { Event, EventSource } from "@/api/types";
+import { CustomNodeData, JsonMessageParam } from "@/types/global";
+import { Event, EventSource } from "@/types/api";
 
 const { confirm } = Modal;
 
@@ -93,7 +93,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const onCustomNodeDelete = useCallback(() => {
     confirm({
       centered: true,
-      title: t("Are you sure delete this note?"),
+      title: t("Are you sure to delete this note?"),
       icon: <ExclamationCircleFilled />,
       okText: t("Delete"),
       okType: "danger",

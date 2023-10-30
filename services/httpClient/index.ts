@@ -1,7 +1,9 @@
 import { getUrlWithParams } from "@/utils/getUrlWithParams";
+
 import { BASE_URL, TOKEN } from "@/constants";
-import { REQUEST_INIT } from "@/services/rest/constants";
-import { Param, HttpResult } from "@/types";
+import { REQUEST_INIT } from "@/services/httpClient/constants";
+
+import { HttpResult, Param } from "@/types/global";
 
 type Option = {
   init: RequestInit;

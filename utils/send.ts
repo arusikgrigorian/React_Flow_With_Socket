@@ -3,8 +3,8 @@ import { SendJsonMessage } from "react-use-websocket/src/lib/types";
 
 import { generateSocketRoomName } from "@/utils/generateSocketRoomName";
 
-import { JsonMessageParam } from "@/types";
-import { ROOM } from "@/api/types";
+import { JsonMessageParam } from "@/types/global";
+import { ROOM } from "@/types/api";
 
 export function send(
   sendJsonMessage: SendJsonMessage,

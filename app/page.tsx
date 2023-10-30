@@ -1,7 +1,7 @@
 import Gemba from "@/components/Gemba";
-import httpClient from "@/services/rest";
+import httpClient from "../services/httpClient";
 import { transformNodes } from "@/utils/transformNodes";
-import { ENDPOINTS } from "@/api/types";
+import { ENDPOINTS } from "@/types/api";
 
 type Params = {
   id: string;
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export default async function Home({ params: { id = "49" } }: Props) {
-  // TODO -> user id can be got here from the cookies (server)
+  // TODO -> user id can be got here from the cookies
   const user = 1;
   const ICId = Number(id);
   const params = { all: true, five_w_two_h: id };
