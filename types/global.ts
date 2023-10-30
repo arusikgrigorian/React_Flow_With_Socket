@@ -47,11 +47,15 @@ export type CustomNodeData = {
   title: string;
   text: string;
   color: string;
+  width: number;
+  height: number;
   fiveWTwoHId: number;
   userId: number;
 };
 
 export type Data = {
+  width?: number | null;
+  height?: number | null;
   position: XYPosition;
   fiveWTwoHId: number;
 };

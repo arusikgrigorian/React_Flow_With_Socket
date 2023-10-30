@@ -77,6 +77,8 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
         title: "",
         text: "",
         color,
+        width: 400,
+        height: 400,
         fiveWTwoHId: ICId,
         userId: user,
       },
@@ -93,7 +95,14 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
 
     const addedNodeData = {
       ...newCustomNode.data,
-      details: { data: { fiveWTwoHId: ICId, position } },
+      details: {
+        data: {
+          fiveWTwoHId: ICId,
+          position,
+          height: newCustomNode.data.height,
+          width: newCustomNode.data.width,
+        },
+      },
     };
 
     sendMessage(params, addedNodeData);
@@ -111,7 +120,14 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
         ...data,
         position,
         userId: data.user,
-        details: { data: { fiveWTwoHId: ICId, position } },
+        details: {
+          data: {
+            fiveWTwoHId: ICId,
+            position,
+            height: data.height,
+            width: data.width,
+          },
+        },
       };
 
       sendMessage(params, draggedNodeData);

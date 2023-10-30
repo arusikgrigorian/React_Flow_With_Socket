@@ -33,7 +33,7 @@ type Props = {
 };
 
 const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
-  const { id, fiveWTwoHId, title, text, color } = data;
+  const { id, fiveWTwoHId, title, text, color, width, height } = data;
 
   const inputColor = getInputColor(color);
   const tooltipColor = getOverlayInnerStyle(color);
@@ -81,13 +81,20 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
       const changedNodeData = {
         ...data,
-        details: { data: { fiveWTwoHId, position: { x: xPos, y: yPos } } },
+        details: {
+          data: {
+            fiveWTwoHId,
+            position: { x: xPos, y: yPos },
+            height,
+            width,
+          },
+        },
         [key]: color || value,
       };
 
       sendMessage(params, changedNodeData);
     },
-    [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendMessage],
+    [id, fiveWTwoHId, data, xPos, yPos, height, width, setNodes, sendMessage],
   );
 
   const onCustomNodeDelete = useCallback(() => {
@@ -128,7 +135,10 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         </button>
       </NodeToolbar>
       <NodeResizeControl
-        style={{ background: "transparent", border: "none" }}
+        style={{
+          background: "transparent",
+          border: "none",
+        }}
         minWidth={400}
         maxWidth={800}
         minHeight={400}
@@ -139,8 +149,12 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         />
       </NodeResizeControl>
       <div
-        style={{ backgroundColor: `rgba(${color},0.8)` }}
-        className={`flex min-w-[400px] min-h-[400px] h-full px-4 py-6 outline-none rounded-default`}
+        style={{
+          backgroundColor: `rgba(${color},0.8)`,
+          minWidth: `${width}px`,
+          minHeight: `${height}px`,
+        }}
+        className={`flex h-full px-4 py-6 outline-none rounded-default`}
       >
         <form className={"flex flex-col gap-4 w-full"}>
           <div className={"absolute top-4 right-12"}>
