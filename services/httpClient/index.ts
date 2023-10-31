@@ -1,9 +1,13 @@
 import { getUrlWithParams } from "@/utils/getUrlWithParams";
-
 import { BASE_URL, TOKEN } from "@/constants";
-import { REQUEST_INIT } from "@/services/httpClient/constants";
-
 import { HttpResult, Param } from "@/types/global";
+
+const REQUEST_INIT: RequestInit = {
+  cache: "no-cache",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
 
 type Option = {
   init: RequestInit;

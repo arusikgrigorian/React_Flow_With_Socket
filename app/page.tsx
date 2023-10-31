@@ -1,7 +1,7 @@
 import Gemba from "@/components/Gemba";
 import httpClient from "../services/httpClient";
 import { transformNodes } from "@/utils/transformNodes";
-import { ENDPOINTS } from "@/types/api";
+import { HTTP_ENDPOINTS } from "@/types/api";
 
 type Params = {
   id: string;
@@ -17,7 +17,7 @@ export default async function Home({ params: { id = "49" } }: Props) {
   const ICId = Number(id);
   const params = { all: true, five_w_two_h: id };
 
-  const { results } = await httpClient.get(ENDPOINTS.gembaNote, params);
+  const { results } = await httpClient.get(HTTP_ENDPOINTS.gembaNote, params);
 
   const nodes = transformNodes(results);
 

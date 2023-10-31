@@ -1,27 +1,35 @@
 import { useEffect } from "react";
 import { useReactFlow } from "reactflow";
-import useWebSocket from "react-use-websocket";
+import useWebSocket, { Options } from "react-use-websocket";
 
 import { getSocketEventType } from "@/utils/getSocketEventType";
 import { extractJsonMessageData } from "@/utils/extractJsonMessageData";
 import { transformNodes } from "@/utils/transformNodes";
 
 import { SOCKET_URL } from "@/constants";
-import { OPTIONS } from "@/hooks/constants";
 
 import { SocketResult } from "@/types/global";
-import { Event } from "@/types/api";
+import { Event, SOCKET_ENDPOINTS } from "@/types/api";
+
+const OPTIONS: Options = {
+  share: true,
+  shouldReconnect: () => false,
+};
 
 type Param = {
   id: string | number;
+  endpoint: string;
 };
 
-export function useSocket(params: Param, nodeId?: string) {
+export function useSocket({ id, endpoint }: Param, nodeId?: string) {
+  const url = `${SOCKET_URL}/${SOCKET_ENDPOINTS.socket}/`;
+  const path = `${endpoint}/${id}/`;
+
   const { setNodes, deleteElements } = useReactFlow();
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<
     SocketResult["jsonMessage"]
-  >(`${SOCKET_URL}/socket/5w2h/${params.id}/`, OPTIONS);
+  >(`${url}${path}`, OPTIONS);
 
   useEffect(() => {
     const lastMessageData = extractJsonMessageData(lastJsonMessage);
@@ -50,6 +58,26 @@ export function useSocket(params: Param, nodeId?: string) {
                 return {
                   ...node,
                   data: { ...lastChangedNode.data },
+                };
+              }
+
+              return node;
+            });
+          });
+        });
+    }
+
+    if (event === Event.resize) {
+      lastChangedNodes.length &&
+        lastChangedNodes.map((lastChangedNode) => {
+          setNodes((nodes) => {
+            return nodes.map((node) => {
+              if (node.id === lastChangedNode.id) {
+                return {
+                  ...node,
+                  data: {
+                    ...lastChangedNode.data,
+                  },
                 };
               }
 

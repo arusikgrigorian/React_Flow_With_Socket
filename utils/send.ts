@@ -18,6 +18,9 @@ export function send(
     type: ROOM.note,
     eventSource,
     event,
-    data,
+    data: {
+      ...data,
+      userId: data.user,
+    },
   });
 }

@@ -8,6 +8,9 @@ function getEventType(event: keyof typeof Event): string {
     case Event.input:
       eventType = Event.input;
       break;
+    case Event.resize:
+      eventType = Event.resize;
+      break;
     case Event.deletion:
       eventType = Event.deletion;
       break;

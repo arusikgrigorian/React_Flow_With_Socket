@@ -45,7 +45,7 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<Array<Node>>(initialNodes);
 
-  const { sendJsonMessage } = useSocket({ id: ICId });
+  const { sendJsonMessage } = useSocket({ id: ICId, endpoint: "5w2h" });
 
   const onFitView = useCallback(() => fitView({ duration: 400 }), [fitView]);
 
@@ -80,7 +80,7 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
         width: 400,
         height: 400,
         fiveWTwoHId: ICId,
-        userId: user,
+        user,
       },
     };
 
@@ -99,8 +99,6 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
         data: {
           fiveWTwoHId: ICId,
           position,
-          height: newCustomNode.data.height,
-          width: newCustomNode.data.width,
         },
       },
     };
@@ -119,13 +117,10 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
       const draggedNodeData = {
         ...data,
         position,
-        userId: data.user,
         details: {
           data: {
             fiveWTwoHId: ICId,
             position,
-            height: data.height,
-            width: data.width,
           },
         },
       };

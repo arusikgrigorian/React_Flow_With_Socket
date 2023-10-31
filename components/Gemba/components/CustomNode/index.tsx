@@ -41,12 +41,60 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
   const { setNodes, deleteElements, fitView } = useReactFlow();
 
-  const { sendJsonMessage } = useSocket({ id }, id);
+  const { sendJsonMessage } = useSocket({ id, endpoint: "5w2h" }, id);
 
   const sendMessage = useCallback(
     (params: JsonMessageParam, data: Node["data"]) =>
       send(sendJsonMessage, params, data),
     [sendJsonMessage],
+  );
+
+  const onCustomNodeResize = useCallback(
+    (_: any, { height, width }: { height: number; width: number }) => {
+      setNodes((nodes) => {
+        return nodes.map((node) => {
+          if (node.id === id) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                height,
+                width,
+              },
+            };
+          }
+
+          return node;
+        });
+      });
+    },
+
+    [id, setNodes],
+  );
+
+  const onCustomNodeResizeEnd = useCallback(
+    (_: any, { height, width }: { height: number; width: number }) => {
+      const params = {
+        groupId: fiveWTwoHId,
+        eventSource: EventSource.gemba,
+        event: Event.resize,
+      };
+
+      const resizedNodeData = {
+        ...data,
+        height,
+        width,
+        details: {
+          data: {
+            fiveWTwoHId,
+            position: { x: xPos, y: yPos },
+          },
+        },
+      };
+
+      sendMessage(params, resizedNodeData);
+    },
+    [fiveWTwoHId, data, xPos, yPos, sendMessage],
   );
 
   const onCustomNodeChange = useCallback(
@@ -85,8 +133,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
           data: {
             fiveWTwoHId,
             position: { x: xPos, y: yPos },
-            height,
-            width,
           },
         },
         [key]: color || value,
@@ -94,7 +140,7 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
 
       sendMessage(params, changedNodeData);
     },
-    [id, fiveWTwoHId, data, xPos, yPos, height, width, setNodes, sendMessage],
+    [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendMessage],
   );
 
   const onCustomNodeDelete = useCallback(() => {
@@ -142,6 +188,8 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         minWidth={400}
         maxWidth={800}
         minHeight={400}
+        onResize={onCustomNodeResize}
+        onResizeEnd={onCustomNodeResizeEnd}
       >
         <FullscreenOutlined
           style={{ color: tooltipColor }}
