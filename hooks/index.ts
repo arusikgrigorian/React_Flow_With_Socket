@@ -34,7 +34,6 @@ export function useSocket({ id, endpoint }: Param, nodeId?: string) {
   useEffect(() => {
     const lastMessageData = extractJsonMessageData(lastJsonMessage);
     const lastChangedNodes = transformNodes(lastMessageData);
-
     const event = getSocketEventType(lastJsonMessage);
 
     if (!event) {
@@ -73,11 +72,12 @@ export function useSocket({ id, endpoint }: Param, nodeId?: string) {
           setNodes((nodes) => {
             return nodes.map((node) => {
               if (node.id === lastChangedNode.id) {
+                const { height, width } = lastChangedNode.data;
+
                 return {
                   ...node,
-                  data: {
-                    ...lastChangedNode.data,
-                  },
+                  style: { height, width },
+                  data: { ...lastChangedNode.data },
                 };
               }
 

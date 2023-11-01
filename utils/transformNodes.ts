@@ -5,24 +5,36 @@ export function transformNodes(
   nodes: Array<CustomNode | Omit<CustomNode, "type" | "position">>,
 ): Array<Node> {
   return nodes && nodes.length
-    ? nodes.map(({ id, title, text, color, five_w_two_h, details, user }) => {
-        const { position, width = 400, height = 400 } = details?.data || {};
-
-        return {
+    ? nodes.map(
+        ({
           id,
-          position,
-          type: "custom",
-          data: {
+          title,
+          text,
+          color,
+          height = 400,
+          width = 400,
+          five_w_two_h,
+          details,
+          user,
+        }) => {
+          const { position } = details?.data || {};
+
+          return {
             id,
-            title,
-            text,
-            color,
-            height,
-            width,
-            fiveWTwoHId: five_w_two_h,
-            user,
-          },
-        };
-      })
+            position,
+            type: "custom",
+            data: {
+              id,
+              title,
+              text,
+              color,
+              height,
+              width,
+              fiveWTwoHId: five_w_two_h,
+              user,
+            },
+          };
+        },
+      )
     : [];
 }

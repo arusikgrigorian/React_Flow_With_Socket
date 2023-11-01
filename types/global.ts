@@ -29,6 +29,8 @@ export type ExtendedCustomNodeData = {
   title: string;
   text: string;
   color: string;
+  width: number;
+  height: number;
   details: Detail;
   fiveWTwoHId: number;
   userId: number;
@@ -69,6 +71,8 @@ export type CustomNode = {
   title: string;
   text: string;
   color: string;
+  height: number;
+  width: number;
   details: Detail;
   position: XYPosition | null;
   type: string | null;

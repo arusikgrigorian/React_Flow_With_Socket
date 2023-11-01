@@ -6,13 +6,25 @@ export function extractJsonMessageData(
   return (
     (jsonMessages &&
       jsonMessages.map(({ data }) => {
-        const { color, details, fiveWTwoHId, id, text, title, userId } = data;
+        const {
+          id,
+          text,
+          title,
+          color,
+          height,
+          width,
+          details,
+          fiveWTwoHId,
+          userId,
+        } = data;
 
         return {
           id,
           title,
           text,
           color,
+          height,
+          width,
           details,
           five_w_two_h: fiveWTwoHId,
           user: userId,

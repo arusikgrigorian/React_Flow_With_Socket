@@ -39,7 +39,7 @@ export default function FlowPanel({
         type={"button"}
         onClick={onFitView}
       >
-        <i>
+        <i className={"flex-centered"}>
           <CompressOutlined />
         </i>
         <span>{t("Fit View")}</span>
@@ -49,7 +49,7 @@ export default function FlowPanel({
         type={"button"}
         onClick={onScreenSizeChange}
       >
-        <i>{ViewIcon}</i>
+        <i className={"flex-centered"}>{ViewIcon}</i>
         <span>{t(isFullScreen ? "Shrink" : "Expand")}</span>
       </button>
     </div>
