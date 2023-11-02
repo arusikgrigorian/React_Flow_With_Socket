@@ -26,6 +26,8 @@ import { Event, EventSource } from "@/types/api";
 
 const { confirm } = Modal;
 
+type Keys = "title" | "text" | "color";
+
 type Props = {
   data: CustomNodeData;
   xPos: number;
@@ -40,7 +42,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   const pickerColor = convertRgbToHex(color);
 
   const { setNodes, deleteElements, fitView } = useReactFlow();
-
   const { sendJsonMessage } = useSocket({ id, endpoint: "5w2h" }, id);
 
   const sendMessage = useCallback(
@@ -98,12 +99,26 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
   );
 
   const onCustomNodeChange = useCallback(
-    (
-      e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-      key: "title" | "text" | "color",
-    ) => {
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: Keys) => {
       const value = e.target.value;
       const color = key === "color" && convertHexToRgb(value);
+
+      const params = {
+        groupId: fiveWTwoHId,
+        eventSource: EventSource.gemba,
+        event: Event.input,
+      };
+
+      const changedNodeData = {
+        ...data,
+        [key]: color || value,
+        details: {
+          data: {
+            fiveWTwoHId,
+            position: { x: xPos, y: yPos },
+          },
+        },
+      };
 
       setNodes((nodes) => {
         return nodes.map((node) => {
@@ -121,23 +136,6 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
         });
       });
 
-      const params = {
-        groupId: fiveWTwoHId,
-        eventSource: EventSource.gemba,
-        event: Event.input,
-      };
-
-      const changedNodeData = {
-        ...data,
-        details: {
-          data: {
-            fiveWTwoHId,
-            position: { x: xPos, y: yPos },
-          },
-        },
-        [key]: color || value,
-      };
-
       sendMessage(params, changedNodeData);
     },
     [id, fiveWTwoHId, data, xPos, yPos, setNodes, sendMessage],
@@ -152,14 +150,14 @@ const CustomNode = memo(function CustomNode({ data, xPos, yPos }: Props) {
       okType: "danger",
       cancelText: t("Cancel"),
       onOk: () => {
-        deleteElements({ nodes: [{ id }] });
-        setTimeout(() => fitView({ duration: 400 }), 100);
-
         const params = {
           groupId: fiveWTwoHId,
           eventSource: EventSource["remove-gemba"],
           event: Event.deletion,
         };
+
+        deleteElements({ nodes: [{ id }] });
+        setTimeout(() => fitView({ duration: 400 }), 100);
 
         sendMessage(params, { id });
       },

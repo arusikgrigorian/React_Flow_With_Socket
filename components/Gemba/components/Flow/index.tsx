@@ -84,9 +84,6 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
       },
     };
 
-    setNodes((nds) => nds.concat(newCustomNode));
-    setTimeout(onFitView, 100);
-
     const params = {
       groupId: ICId,
       eventSource: EventSource.gemba,
@@ -102,6 +99,9 @@ export default function Flow({ nodes: initialNodes, ICId, user }: Props) {
         },
       },
     };
+
+    setNodes((nds) => nds.concat(newCustomNode));
+    setTimeout(onFitView, 100);
 
     sendMessage(params, addedNodeData);
   }, [project, setNodes, onFitView, ICId, user, sendMessage]);
