@@ -25,7 +25,7 @@ class HttpClient {
     this._token = `Token ${TOKEN}`;
   }
 
-  // TODO uncomment if cookies are not being used and the token should be set outside
+  // TODO -> setter for the token if the cookies are not being used
   // set authToken(token: string) {
   //   this._token = `Token ${token}`;
   // }
