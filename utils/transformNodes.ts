@@ -17,7 +17,7 @@ export function transformNodes(
           details,
           user,
         }) => {
-          const { position } = details?.data || {};
+          const { position = { x: 0, y: 0 } } = details?.data || {};
 
           return {
             id,

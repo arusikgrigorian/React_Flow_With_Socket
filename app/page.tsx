@@ -11,7 +11,7 @@ type Props = {
   params: Params;
 };
 
-export default async function Home({ params: { id = "49" } }: Props) {
+export default async function Home({ params: { id = "40" } }: Props) {
   const user = 1; // TODO -> user id can be got here from the cookies
   const ICId = Number(id);
   const params = { all: true, five_w_two_h: id };
