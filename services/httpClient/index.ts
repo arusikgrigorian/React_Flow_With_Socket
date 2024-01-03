@@ -18,21 +18,16 @@ class HttpClient {
   static readonly INIT: RequestInit = REQUEST_INIT;
 
   init: RequestInit;
-  _token: string;
+  token: string;
 
   constructor(options?: Option) {
     this.init = options?.init || HttpClient.INIT;
-    this._token = `Token ${TOKEN}`;
+    this.token = `Token ${TOKEN}`;
   }
-
-  // TODO -> setter for the token if the cookies are not being used
-  // set authToken(token: string) {
-  //   this._token = `Token ${token}`;
-  // }
 
   async _request<T = HttpResult>(endpoint: string, params?: Param): Promise<T> {
     const url = getUrlWithParams(HttpClient.BASE_URL, endpoint, params);
-    const headers = { ...this.init.headers, Authorization: this._token };
+    const headers = { ...this.init.headers, Authorization: this.token };
     const init = { ...this.init, headers };
 
     const response: Response = await fetch(url, init);
