@@ -14,8 +14,12 @@ type Option = {
 };
 
 class HttpClient {
-  static readonly BASE_URL: string = BASE_URL;
-  static readonly INIT: RequestInit = REQUEST_INIT;
+  // replace static fields with static private fields
+  // replace _method with static private method
+  // implement singleton pattern
+  
+  static BASE_URL: string = BASE_URL;
+  static INIT: RequestInit = REQUEST_INIT;
 
   init: RequestInit;
   token: string;
